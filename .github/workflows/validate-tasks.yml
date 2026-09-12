@@ -1,0 +1,21 @@
+name: validate-tasks
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Validate every task
+        run: ./scripts/validate-all.sh
+      - name: Run the worked example's reproduction
+        working-directory: tasks/hello-cache-py
+        run: |
+          PYTHONPATH=environment/src python3 reference/reproductions/repro_unrelated_prefix.py
+          PYTHONPATH=environment/src ./environment/smoke-test.sh

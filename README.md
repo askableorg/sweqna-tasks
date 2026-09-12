@@ -1,0 +1,98 @@
+# SWE Q&A Tasks
+
+Source-available template for authoring **SWE Q&A** evaluation tasks for Askable:
+original questions about real codebases, answered from evidence, graded against a
+rubric rather than a test suite. It includes the artefact templates, a worked
+example, and a validator that checks structure, citations, rubric consistency and
+answer leakage before a reviewer ever opens the task.
+
+**The goal of every SWE Q&A task is to capture a question a skilled engineer can
+answer from the code and an AI agent cannot yet answer correctly.** A task earns
+its place by isolating one of those gaps. Questions a model answers from general
+knowledge are worthless, and so are questions no engineer could settle from the
+supplied source.
+
+This is a different product from a terminal task, and the difference is the whole
+point. A terminal task asks an agent to *do* something and a verifier decides
+whether it worked. A SWE Q&A task asks an agent to *explain* something, and a
+rubric written by a human who already established the answer decides whether the
+explanation is right. **`Number of Rubrics` is the headline quality metric here,
+not `Number of Hidden Test Cases`.**
+
+Use is restricted by the repository licence and the Askable participant
+agreement. Do not use this repository to create tasks for another purpose.
+
+## Read these first
+
+1. **`AUTHORING.md`** — what a good question is and how to build one. The core
+   document; read it before writing anything.
+2. **`DIFFICULTY.md`** — the acceptance bar, the contamination probe, and what
+   gets rejected.
+3. **`CONTRIBUTING.md`** — process, the AI-use policy, provenance, attestations,
+   submission.
+4. **`CONTEXT.md`** — the vocabulary (question, reference answer, evidence
+   record, criterion, probe) the other documents assume.
+5. **`tasks/hello-cache-py/`** — a complete worked example. Read it alongside
+   `AUTHORING.md`; between the two, the example is the one that will teach you
+   the shape.
+
+## The workflow, end to end
+
+1. **Sign the Askable participant agreement**, then clone this repository.
+2. **Create your own private GitHub repository** from your clone. All your work
+   lives there, with real incremental commit history — we review that history as
+   part of acceptance.
+3. **Scaffold a task:** `./scripts/new-task.sh my-task`.
+4. **Fill `PROPOSAL.md` and send it through Askable.** This is a checkpoint, not
+   a formality: it is where the repository and the scope get approved, and it is
+   the cheapest place to find out the question does not work. It requires the
+   contamination probe (`DIFFICULTY.md`). Do not start substantial authoring
+   before approval. One approved task at a time.
+5. **Build the environment, investigate, and write the answer** with evidence
+   records that cite real paths, symbols and line ranges at the pinned commit.
+6. **Write the rubric, then test it** against four answers: your reference, a
+   correct paraphrase, and two plausible flawed answers.
+7. **Validate:** `./scripts/validate-task.sh tasks/my-task` — clean before you
+   submit.
+8. **Submit** (`CONTRIBUTING.md`), then either add Askable's reviewer account
+   (`@xicovarisco`) as a read collaborator on your private repository, or send an
+   archive.
+
+## Validate
+
+```bash
+./scripts/validate-task.sh tasks/my-task     # one task
+./scripts/validate-all.sh                    # everything under tasks/
+./scripts/validate-task.sh tasks/my-task --strict   # warnings fail too
+```
+
+The validator checks what a reviewer would otherwise check by hand: every
+required file present, every JSON parsing, every cited path and symbol existing
+with the line range inside the file, every `evidence_ids` reference resolving,
+every rubric criterion labelled in every grading example, each example's
+`expected_outcome` agreeing with its own labels, and the Dockerfile not copying
+`reference/` or `evaluation/` into the participant image.
+
+**Green is the precondition for review, not evidence that the task is any good.**
+It cannot tell you whether the question is interesting or the answer is right.
+
+## What Askable does, and what you do not have to
+
+You do not need API keys, an agent harness, or the production judge. Askable runs
+the authoritative calibration and judge validation against the designated target
+for your batch. You run the contamination probe — it is free, takes one message,
+and is required.
+
+Disclose any self-check you do run: model and version, task revision, budget,
+every answer produced, and your per-criterion scores. An honest "not run" is
+fine. An undisclosed run is not.
+
+## Repository layout
+
+| Path | What it is |
+|---|---|
+| `AUTHORING.md` `DIFFICULTY.md` `CONTRIBUTING.md` `CONTEXT.md` | The documents above |
+| `schema/FIELDS.md` | Field-by-field reference for every JSON artefact |
+| `scripts/` | `new-task.sh`, `validate-task.sh`, `validate-all.sh`, `validate_task.py` |
+| `templates/` | `PROPOSAL.md`, `instruction.md`, `AUTHOR_NOTES.md`, attestation |
+| `tasks/hello-cache-py/` | The worked example — reference only, not eligible |

@@ -1,0 +1,69 @@
+{
+  "schema_version": 1,
+  "evidence": [
+    {
+      "id": "E01",
+      "claim": "The fetch captures the store generation before it suspends and passes that stale reading to insert when it resumes; it returns the fetched value to its caller regardless of whether the insert succeeded.",
+      "source": {
+        "path": "environment/src/cachelib/fetcher.py",
+        "symbol": "Fetcher.fetch",
+        "commit": "TASK_CODE_COMMIT",
+        "lines": "19-23"
+      },
+      "verification": "Source analysis. Read Fetcher.fetch top to bottom and note the order of the four statements: generation read (19), suspension point (20), origin call (21), insert with the captured value (22), return of value (23). The boolean returned by insert is not bound at line 22.",
+      "result": {
+        "observed": "observed_generation is read at line 19, strictly before the yield at line 20; insert receives it at line 22; line 23 returns value unconditionally.",
+        "interpretation": "Any generation change occurring during the suspension is invisible to the fetch but fatal to its insert, and the caller cannot tell the difference.",
+        "log": null
+      }
+    },
+    {
+      "id": "E02",
+      "claim": "Store.insert writes nothing when the supplied generation differs from the current generation, and records the rejection.",
+      "source": {
+        "path": "environment/src/cachelib/store.py",
+        "symbol": "Store.insert",
+        "commit": "TASK_CODE_COMMIT",
+        "lines": "23-33"
+      },
+      "verification": "Source analysis. The guard at line 29 compares the argument with self._generation; lines 30-31 increment rejected_inserts and return False; the assignment at line 32 is reachable only on an exact match.",
+      "result": {
+        "observed": "Inequality short-circuits before any mutation of self._entries.",
+        "interpretation": "Insert rejection is the only mechanism in this function that can cause a key to be absent after a completed fetch; it is distinguishable from eviction by the rejected_inserts counter.",
+        "log": null
+      }
+    },
+    {
+      "id": "E03",
+      "claim": "Store.invalidate increments the generation unconditionally, independently of the prefix and of whether any entry matched.",
+      "source": {
+        "path": "environment/src/cachelib/store.py",
+        "symbol": "Store.invalidate",
+        "commit": "TASK_CODE_COMMIT",
+        "lines": "35-41"
+      },
+      "verification": "Source analysis. The increment at line 40 sits outside the deletion loop at lines 38-39, is not guarded by the contents of doomed, and does not reference prefix. The counter is a single store-wide integer initialised at store.py:12, not a per-prefix or per-key structure.",
+      "result": {
+        "observed": "self._generation += 1 executes on every call, including calls that delete zero entries.",
+        "interpretation": "The generation is a global epoch, so invalidating one key space invalidates in-flight work in all key spaces. This is the fact that makes the prefix irrelevant to the outcome.",
+        "log": null
+      }
+    },
+    {
+      "id": "E04",
+      "claim": "In the instruction's interleaving the outcome is the same for an unrelated prefix and a matching prefix: zero entries dropped, generation 0 to 1, the value returned to the caller, no entry in the store, and one rejected insert.",
+      "source": {
+        "path": "reference/reproductions/repro_unrelated_prefix.py",
+        "symbol": "scenario",
+        "commit": "TASK_CODE_COMMIT",
+        "lines": "15-35"
+      },
+      "verification": "PYTHONPATH=environment/src python3 reference/reproductions/repro_unrelated_prefix.py — run from the task root with the pinned source, Python 3.12, no network. The Scheduler fixes the interleaving explicitly, so the result carries no timing dependence.",
+      "result": {
+        "observed": "Both prefixes print entries_dropped_by_invalidate: 0, generation_before: 0, generation_after: 1, value_returned_to_caller: 'value-for-user:42', value_in_cache_afterwards: None, rejected_inserts: 1.",
+        "interpretation": "Identical output across the two prefixes rules out the prefix-matters explanation. rejected_inserts: 1 alongside entries_dropped: 0 rules out eviction and identifies the generation guard as the mechanism.",
+        "log": "reference/reproductions/repro_unrelated_prefix.log"
+      }
+    }
+  ]
+}

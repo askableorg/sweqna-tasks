@@ -1,0 +1,81 @@
+{
+  "schema_version": 1,
+  "examples": [
+    {
+      "id": "G01",
+      "label": "reference",
+      "expected_outcome": "pass",
+      "answer_source": "reference/answer.md",
+      "answer_text": null,
+      "criteria": [
+        {"id": "R01", "met": true, "note": "States store.get returns None."},
+        {"id": "R02", "met": true, "note": "States the caller receives the fetched value and that insert's return is discarded."},
+        {"id": "R03", "met": true, "note": "Identifies the comparison in Store.insert and the early return with no write."},
+        {"id": "R04", "met": true, "note": "Places the generation read before the suspension point and notes it is not re-read."},
+        {"id": "R05", "met": true, "note": "Grounds prefix irrelevance in the unconditional increment outside the deletion loop."},
+        {"id": "R06", "met": true, "note": "Separates rejection from eviction using zero entries dropped and one rejected insert."},
+        {"id": "R07", "met": true, "note": "Gives the non-overlapping interleavings and the cache-hit path."},
+        {"id": "R08", "met": true, "note": "Reports the command and the two-prefix output that discriminates the prefix explanation."},
+        {"id": "R09", "met": true, "note": "States the cooperative scheduler and absent locking limit what the evidence shows."}
+      ],
+      "explanation": "All required criteria met; no material contradiction."
+    },
+    {
+      "id": "G02",
+      "label": "correct_paraphrase",
+      "expected_outcome": "pass",
+      "answer_source": null,
+      "answer_text": "Nothing lands in the cache. The lookup after step 3 misses, but the call itself still hands back the value it fetched from the origin — the caller cannot tell that the write was dropped.\n\nThe store keeps a single epoch number. A read-through fetch snapshots that epoch on the way out, before it blocks on the origin, and hands the snapshot back when it writes. The write path only accepts a write whose snapshot still equals the live epoch; otherwise it counts a rejection and returns without touching the entry table. Since invalidation advances the epoch for the whole store — the bump happens on every call, including calls where the prefix matched nothing and no key was deleted — the snapshot taken at step 1 is one behind by the time step 3 writes, and the write is dropped. Swapping \"session:\" for any other prefix changes nothing.\n\nWorth being precise about what did not happen: nothing was evicted. The key was never in the table, because the fetch had not finished. I checked by printing the store's rejection counter and the number of keys the invalidation deleted after running the three steps — deleted 0, rejections 1. Eviction would have given the opposite pair, so that one observation separates the two stories.\n\nThe write succeeds if the invalidation finishes before the fetch snapshots the epoch, or after the fetch has written. It is the overlap that costs the write, not invalidation as such.",
+      "criteria": [
+        {"id": "R01", "met": true, "note": "\"Nothing lands in the cache\" and the lookup misses."},
+        {"id": "R02", "met": true, "note": "Caller receives the value; failure invisible at the call site."},
+        {"id": "R03", "met": true, "note": "Snapshot-versus-live comparison with no write on mismatch. \"Epoch\" is an accepted alternative term."},
+        {"id": "R04", "met": true, "note": "Snapshot taken before blocking on the origin."},
+        {"id": "R05", "met": true, "note": "Bump happens on every call including zero-deletion calls; any prefix behaves the same."},
+        {"id": "R06", "met": true, "note": "Explicitly not eviction; uses the deleted-0 / rejections-1 pair."},
+        {"id": "R07", "met": true, "note": "Gives both non-overlapping orderings."},
+        {"id": "R08", "met": true, "note": "Instrumented the counters rather than varying the prefix; the observation still discriminates, which R08 allows."},
+        {"id": "R09", "met": false, "note": "No limitation stated. Optional — diagnostic only, does not affect the outcome."}
+      ],
+      "explanation": "All eight required criteria met. R09 unmet, which is diagnostic only and does not change the pass."
+    },
+    {
+      "id": "G03",
+      "label": "flawed_prefix_scoping",
+      "expected_outcome": "fail",
+      "answer_source": null,
+      "answer_text": "Yes, user:42 ends up cached, and the caller gets the fetched value back.\n\nThe fetcher reads the store's generation before it blocks on the origin call and passes that reading to insert when it resumes. Insert compares the two generations and refuses the write if they differ — that is the stale-write guard.\n\nHere the guard passes. The invalidation targeted the \"session:\" prefix, and user:42 is in a different namespace, so the invalidation does not disturb the generation that the user: keys are tracked under. The fetch's captured generation still matches at insert time, the write is accepted, and the entry is present after step 3.\n\nThis is the intended design: an invalidation should only discard concurrent work for the key space it actually targets, otherwise one noisy prefix would keep clearing everyone else's in-flight fetches.",
+      "criteria": [
+        {"id": "R01", "met": false, "note": "Says the entry is present. Matches the fail condition directly."},
+        {"id": "R02", "met": true, "note": "Correctly says the caller receives the fetched value, though for the wrong reason."},
+        {"id": "R03", "met": true, "note": "Describes the comparison in insert and the refusal on mismatch accurately."},
+        {"id": "R04", "met": true, "note": "Places the capture before the origin call."},
+        {"id": "R05", "met": false, "note": "Asserts a per-namespace generation. The counter is a single store-wide integer incremented with no reference to prefix (store.py:12, 40)."},
+        {"id": "R06", "met": false, "note": "Never separates rejection from eviction; concludes there was no rejection at all."},
+        {"id": "R07", "met": false, "note": "The only boundary offered — that the prefix must overlap — is the error itself."},
+        {"id": "R08", "met": false, "note": "No experiment. One run with a varied prefix would have shown the identical outcome and caught this."},
+        {"id": "R09", "met": false, "note": "No limitation stated."}
+      ],
+      "explanation": "Fails on one root factual error that propagates: it assumes the generation counter is scoped per prefix or namespace. Store.invalidate increments a single store-wide integer at store.py:40, outside the deletion loop and without consulting prefix, so the guard rejects the insert and the entry is absent. This is the wrong answer the two-prefix reproduction is built to catch, and it is the shape a plausible-sounding answer takes when nobody runs the code."
+    },
+    {
+      "id": "G04",
+      "label": "flawed_eviction_mechanism",
+      "expected_outcome": "fail",
+      "answer_source": null,
+      "answer_text": "After step 3 the key is gone — store.get(\"user:42\") returns None — and the caller still receives the value that was fetched.\n\nThe reason is the invalidation. invalidate() walks the entry table and deletes what it finds, and because the generation counter it maintains is store-wide rather than per-prefix, the effect is not limited to the keys that matched: the whole table is cleared out from under the in-flight fetch. The fetch's result is therefore evicted along with everything else, which is why the lookup misses. The prefix argument does not change this, since the clear-out is global either way.\n\nI confirmed it by running the three steps and printing the store's keys afterwards; the list was empty.\n\nSo the behaviour the service is seeing is expected: invalidation is coarser than it looks, and unrelated entries get purged with it.",
+      "criteria": [
+        {"id": "R01", "met": true, "note": "Correct outcome: the key is absent."},
+        {"id": "R02", "met": true, "note": "Correct: the caller receives the value."},
+        {"id": "R03", "met": false, "note": "Never describes the comparison in insert. Attributes the absence to deletion, which the fail condition names explicitly."},
+        {"id": "R04", "met": false, "note": "The capture-before-suspension ordering is never established; on this account it would not matter."},
+        {"id": "R05", "met": false, "note": "Reaches prefix irrelevance, but grounds it in a global clear-out rather than the unconditional generation bump. The pass condition requires the mechanism, not the conclusion."},
+        {"id": "R06", "met": false, "note": "The eviction account is the fail condition. invalidate(\"session:\") deleted zero entries, and user:42 was never in the table to be deleted."},
+        {"id": "R07", "met": false, "note": "No boundary. On this account no interleaving would change the outcome."},
+        {"id": "R08", "met": false, "note": "An experiment was run, but printing an empty key list is consistent with both eviction and rejection. It cannot discriminate, which the fail condition covers."},
+        {"id": "R09", "met": false, "note": "No limitation stated."}
+      ],
+      "explanation": "Right outcome, wrong mechanism — the failure mode a rubric graded only on the conclusion would miss. invalidate deletes only keys matching the prefix (store.py:37-39) and dropped zero here; the entry was never in the table, and the miss is caused by insert rejecting a stale generation (store.py:29-31). The experiment is the tell: it observes something both explanations predict, so it confirmed nothing."
+    }
+  ]
+}

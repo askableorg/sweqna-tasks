@@ -1,0 +1,18 @@
+--- invalidate('session:') while fetch('user:42') is in flight ---
+  invalidated_prefix: 'session:'
+  entries_dropped_by_invalidate: 0
+  generation_before: 0
+  generation_after: 1
+  value_returned_to_caller: 'value-for-user:42'
+  value_in_cache_afterwards: None
+  rejected_inserts: 1
+
+--- invalidate('user:') while fetch('user:42') is in flight ---
+  invalidated_prefix: 'user:'
+  entries_dropped_by_invalidate: 0
+  generation_before: 0
+  generation_after: 1
+  value_returned_to_caller: 'value-for-user:42'
+  value_in_cache_afterwards: None
+  rejected_inserts: 1
+

@@ -1,0 +1,71 @@
+Askable Task Authoring License
+
+Copyright (c) 2026 Askable. All rights reserved.
+
+1. Definitions
+
+"Askable" means the Askable entity that provides this repository and enters into
+the Askable participant agreement.
+
+"Authorized Participant" means an individual who has an active, signed Askable
+participant agreement.
+
+"Materials" means this repository and all files, documentation, templates, and
+examples contained in it.
+
+"Task Contribution" means any task, code, fixture, verifier, oracle solution,
+documentation, or other material created from or submitted with the Materials.
+
+2. Conditional license grant
+
+Subject to continued compliance with this license and an active Askable participant
+agreement, Askable grants each Authorized Participant a limited, non-exclusive,
+non-transferable, non-sublicensable, revocable license to copy and use the
+Materials solely to create and submit Task Contributions for Askable.
+
+3. Restrictions
+
+Except as expressly permitted in Section 2, you may not:
+
+- use the Materials or Task Contributions for yourself or any third party;
+- create, train, evaluate, improve, or distribute a dataset, benchmark, model, or
+  product using the Materials or Task Contributions for any party other than
+  Askable;
+- publish, distribute, sublicense, sell, lease, or otherwise make the Materials
+  or Task Contributions available to another person;
+- remove proprietary notices or use Askable's name or marks without permission;
+- submit an AI-generated task instruction, or use AI tools on a Task
+  Contribution without disclosing them and personally verifying every file,
+  as required by CONTRIBUTING.md.
+
+4. Task Contributions
+
+Each Task Contribution is subject to the contributor's signed Askable participant
+agreement and completed contribution attestation. By submitting a Task
+Contribution, the contributor represents that they own, or have sufficient
+authority to assign, all rights necessary for Askable's intended use, including
+AI-model training, and assigns to Askable all right, title, and interest in that
+Task Contribution to the extent permitted by applicable law.
+
+5. No open-source grant
+
+The Materials are not licensed under an open-source license. No rights are granted
+to persons who are not Authorized Participants.
+
+6. Termination
+
+The license ends automatically if the participant agreement ends or if the
+Authorized Participant breaches this license. On termination, the Authorized
+Participant must stop using the Materials and, on Askable's request, delete them
+and any Task Contributions not already transferred to Askable.
+
+7. Disclaimer
+
+THE MATERIALS ARE PROVIDED "AS IS" WITHOUT WARRANTIES OF ANY KIND. TO THE MAXIMUM
+EXTENT PERMITTED BY LAW, ASKABLE DISCLAIMS ALL IMPLIED WARRANTIES, INCLUDING
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND NON-INFRINGEMENT.
+
+8. Governing documents
+
+If this license conflicts with the Askable participant agreement, the participant
+agreement controls.

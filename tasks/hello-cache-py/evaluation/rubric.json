@@ -1,0 +1,121 @@
+{
+  "schema_version": 1,
+  "criteria": [
+    {
+      "id": "R01",
+      "requirement": "State what store.get(\"user:42\") returns after step 3.",
+      "claim": "user:42 is absent from the store after the fetch completes.",
+      "pass_condition": "States that the key is not in the store, or equivalently that a lookup returns None / a miss.",
+      "acceptable_alternatives": [
+        "Says the entry was never written rather than that it is absent.",
+        "Shows the outcome through observed output (store.get returning None, or an empty key listing) rather than stating it in prose."
+      ],
+      "fail_condition": "Says the entry is present, or leaves the outcome unstated or conditional without resolving it.",
+      "evidence_ids": ["E02", "E04"],
+      "required": true
+    },
+    {
+      "id": "R02",
+      "requirement": "State what value the fetch returns to its caller.",
+      "claim": "The fetch returns the fetched value to its caller even though the insert was rejected.",
+      "pass_condition": "States that the caller receives the value produced by the origin call, and that this is independent of the insert outcome.",
+      "acceptable_alternatives": [
+        "Frames it as the failure being invisible to the caller, or as a cache-effectiveness rather than correctness problem.",
+        "Notes that insert's return value is discarded."
+      ],
+      "fail_condition": "Says the caller receives None, an error, or a stale value, or claims the rejected insert propagates to the caller.",
+      "evidence_ids": ["E01"],
+      "required": true
+    },
+    {
+      "id": "R03",
+      "requirement": "Explain the mechanism: which values are compared.",
+      "claim": "Store.insert compares the generation supplied by the caller with the store's current generation and writes nothing on a mismatch.",
+      "pass_condition": "Identifies the comparison in Store.insert between the passed-in generation and the live counter, and states that inequality causes an early return with no write.",
+      "acceptable_alternatives": [
+        "Calls the counter a version, epoch, or sequence number.",
+        "Describes the guard via the rejected_inserts counter or the False return rather than quoting the condition."
+      ],
+      "fail_condition": "Attributes the rejection to a different mechanism (key matching, TTL, locking, eviction), or describes insert as overwriting or partially writing.",
+      "evidence_ids": ["E02"],
+      "required": true
+    },
+    {
+      "id": "R04",
+      "requirement": "Explain the mechanism: where the compared values are captured and read.",
+      "claim": "The fetch reads the generation before it suspends, so the value it later supplies to insert predates the invalidation.",
+      "pass_condition": "States that the generation is captured before the suspension point and is not re-read on resume, making it stale by the time insert runs.",
+      "acceptable_alternatives": [
+        "Explains it as the fetch holding a snapshot, or as the read happening outside the suspension window.",
+        "Demonstrates the ordering by citing the statement order in Fetcher.fetch."
+      ],
+      "fail_condition": "Claims the generation is read at insert time, re-read after the suspension, or passed by reference so that it tracks the store.",
+      "evidence_ids": ["E01"],
+      "required": true
+    },
+    {
+      "id": "R05",
+      "requirement": "State whether the prefix passed to invalidate changes the outcome, and why.",
+      "claim": "The prefix is irrelevant because invalidate increments one store-wide generation unconditionally, even when no key matched.",
+      "pass_condition": "States that the outcome is unchanged for any prefix, and grounds it in the generation being global and incremented outside the deletion loop regardless of whether entries matched.",
+      "acceptable_alternatives": [
+        "Describes the counter as a global epoch rather than per-prefix or per-key.",
+        "Makes the point by observing that an invalidation dropping zero entries still moves the counter."
+      ],
+      "fail_condition": "Says user:42 survives when the prefix does not match it, or that the prefix is scoped to the keys it deletes, or makes the conclusion conditional on the prefix overlapping the key.",
+      "evidence_ids": ["E03", "E04"],
+      "required": true
+    },
+    {
+      "id": "R06",
+      "requirement": "Explain the mechanism rather than an outcome-compatible alternative.",
+      "claim": "The absence is caused by insert rejection, not by eviction; the entry was never in the store to be evicted.",
+      "pass_condition": "Distinguishes rejection from eviction, noting that the fetch was still in flight so there was no entry to delete and that invalidate dropped zero entries.",
+      "acceptable_alternatives": [
+        "Cites rejected_inserts being 1 while entries dropped is 0.",
+        "Reaches the distinction by reasoning about the ordering: nothing was written before the invalidation ran."
+      ],
+      "fail_condition": "Attributes the absence to the entry being evicted, cleared, or purged by invalidate.",
+      "evidence_ids": ["E02", "E04"],
+      "required": true
+    },
+    {
+      "id": "R07",
+      "requirement": "Identify at least one condition under which the outcome would differ.",
+      "claim": "The outcome depends on the invalidation overlapping the fetch's suspension window.",
+      "pass_condition": "Gives at least one concrete interleaving under which the insert succeeds — the invalidation completing before the generation is captured, or after the insert.",
+      "acceptable_alternatives": [
+        "Names the cache-hit path, which returns early and never reads the generation or inserts.",
+        "Describes the boundary as the fetch not overlapping any invalidation."
+      ],
+      "fail_condition": "Presents the rejection as unconditional for this key, or gives no boundary at all.",
+      "evidence_ids": ["E01", "E03"],
+      "required": true
+    },
+    {
+      "id": "R08",
+      "requirement": "Run an experiment that distinguishes the conclusion from a plausible wrong one, and report the command and output.",
+      "claim": "The answer reports an executed experiment whose output discriminates between the candidate explanations.",
+      "pass_condition": "Reports a command that was run and the output observed, and the experiment is capable of separating the correct conclusion from at least one plausible wrong one — for example by varying the prefix, or by reading rejected_inserts to separate rejection from eviction.",
+      "acceptable_alternatives": [
+        "Any script, REPL transcript, or added test that produces the discriminating observation.",
+        "Instrumenting the store rather than varying the prefix, provided the observation separates the explanations."
+      ],
+      "fail_condition": "Reports no experiment, reports output that cannot distinguish the explanations (for example a single run that only shows the key is absent), or presents output that was not actually produced.",
+      "evidence_ids": ["E04"],
+      "required": true
+    },
+    {
+      "id": "R09",
+      "requirement": "State what the evidence does not establish.",
+      "claim": "The evidence says nothing about behaviour under real threading.",
+      "pass_condition": "Notes that the scheduler is cooperative and single-threaded and that Store has no locking, so the experiment does not speak to genuine concurrency.",
+      "acceptable_alternatives": [
+        "Any other correctly reasoned limitation of the evidence, clearly identified as a limitation."
+      ],
+      "fail_condition": "Claims the experiment demonstrates thread safety or its absence.",
+      "evidence_ids": ["E04"],
+      "required": false
+    }
+  ]
+}

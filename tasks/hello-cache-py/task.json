@@ -1,0 +1,26 @@
+{
+  "schema_version": 1,
+  "task_id": "hello-cache-py",
+  "revision": 1,
+  "task_type": "SWE_QA",
+  "verification_method": "RUBRIC",
+  "category": "Root-Cause Analysis",
+  "primary_languages": ["Python"],
+  "repo_url": "https://github.com/askableorg/sweqna-tasks",
+  "repo_commit": "TASK_CODE_COMMIT",
+  "author": {
+    "name": "Askable Labs",
+    "github": "askableorg"
+  },
+  "ai_tools_used": ["claude-code"],
+  "status": "example",
+  "environment": {
+    "base_image_digest": "python@sha256:REPLACE_WITH_PINNED_DIGEST",
+    "architecture": "linux/amd64",
+    "cpus": 1,
+    "memory_mb": 2048,
+    "storage_mb": 4096,
+    "network_mode": "no-network",
+    "source_modifications": "None. The cachelib package under environment/src was authored for this example rather than taken from an external project, so there is no upstream revision to pin and no modification to disclose. A submittable task pins a real repository to a full commit SHA and records every deviation from it here."
+  }
+}
