@@ -31,9 +31,10 @@
 ## Self-check disclosure
 
 <!--
-Agent, model, task revision, budget, every answer produced, and your
-per-criterion score for each. Write "not run" explicitly if you ran none —
-do not leave this section empty.
+The machine-readable record is calibration/self-check.json. Summarise it here:
+what you ran, how many attempts passed, and what the grading taught you about
+your own rubric. Name any criterion you changed afterwards and why — clarifying
+an ambiguous pass_condition is fine; deleting a criterion the agent met is not.
 -->
 
 ## Effort log

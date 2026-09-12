@@ -73,14 +73,14 @@ propose a replacement rather than submitting it.
 
 ## Self-check disclosure
 
-**Agentic self-check: not run.** This example exists to demonstrate the artefact
-shape, and its difficulty is not in question — it is deliberately easy and not
-eligible.
+**Not run, and exempt.** A submittable task requires `calibration/self-check.json`
+with at least three graded attempts; the validator skips that check for
+`status: "example"`. This task is deliberately easy and would pass 3/3, which is
+the outcome that fails a real submission.
 
-For a real task, record here: agent and model, task revision, budget, every
-answer produced, and the per-criterion score you gave each. Askable's run against
-the designated target is the authoritative one; yours is evidence about the task,
-never the measurement that decides acceptance.
+The shape a real one takes is in `templates/self-check.json`: agent, exact model
+version, date, task revision, budget, and for every attempt the agent's full
+answer plus your per-criterion grading. Commit the rubric before you run it.
 
 ## Effort log
 
@@ -100,6 +100,9 @@ engineer was asked to solve it.
 - The Dockerfile pins a tag, not a digest. A submittable task pins the digest.
 - `repo_url` points at this template repository and `repo_commit` is a
   placeholder, because there is no upstream project to pin.
+- `environment.mode` is `container` because E04 is executed evidence. Had the
+  answer rested entirely on reading `store.py` and `fetcher.py`, this would have
+  been a `source-only` task and no Dockerfile would exist.
 - The question is answerable in roughly ten minutes by a competent Python reader.
   A submittable task requires investigation across components, and this one does
   not.

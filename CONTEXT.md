@@ -52,10 +52,15 @@ conclusion from a plausible wrong one. Output consistent with both explanations
 is not evidence.
 
 **Environment**:
-The container the participant investigates in, built from
-`environment/Dockerfile`: source at a pinned commit, configuration, inputs, and
-the tools needed to inspect and run the relevant behaviour. Offline. It holds
-nothing from `reference/` or `evaluation/`.
+What the participant investigates in: source at a pinned commit, configuration,
+inputs, and whatever is needed to inspect the relevant behaviour. Always offline,
+and it holds nothing from `reference/`, `evaluation/` or `calibration/`.
+
+**Environment mode**:
+`container` or `source-only`, set in `task.json`. `container` ships a Dockerfile
+pinned by digest and is required for any task carrying executed evidence.
+`source-only` ships a fetch script and a checksummed archive, and is allowed only
+when every evidence record is source analysis. A runtime claim needs a runtime.
 
 **Smoke test**:
 A check that the environment is usable. It deliberately does not exercise the
@@ -98,9 +103,12 @@ from general knowledge or memorised source and the task is dead. Required at
 proposal, recorded in `AUTHOR_NOTES.md`. Free.
 
 **Self-check**:
-An author's own attempt to measure difficulty, with any agent and model. Evidence
-about a task, never the measurement that decides acceptance. Must be disclosed in
-full, including every answer produced.
+Three or more agent attempts run by the author, with every answer graded against
+their own rubric, recorded in `calibration/self-check.json` with
+`authoritative: false`. Required before submission. The fraction is a kill screen
+(3/3 means too easy); the grading is what the exercise is for. Never the
+measurement that decides acceptance.
+_Avoid_: calling it calibration.
 
 **Calibration**:
 Askable's authoritative fixed-attempt measurement against the designated target,

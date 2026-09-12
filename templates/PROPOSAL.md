@@ -41,6 +41,9 @@ attachments, no follow-ups. Record model, version, date, and the full answer.
 
 ## Environment and evidence
 
+- **Mode:** `container` or `source-only`. Source-only is allowed only when every
+  piece of evidence is source analysis — if any claim needs running the code, it
+  is a container task. Say which and why.
 - **Planned runtime experiment:** what you will run, and which wrong conclusion
   it rules out.
 - **Dependencies required, and the source of each asset:**

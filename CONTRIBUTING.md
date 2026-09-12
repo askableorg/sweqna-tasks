@@ -50,7 +50,8 @@ them.
 
 ## Separation
 
-Nothing under `reference/` or `evaluation/` may reach the participant image. Use
+Nothing under `reference/`, `evaluation/` or `calibration/` may reach the
+participant environment. Use
 explicit `COPY` paths in the Dockerfile — never `COPY . /task`. The validator
 enforces this, but the rule matters more than the check: a participant who can
 see the answer key produces a measurement of nothing.
@@ -63,16 +64,19 @@ rejects-it.py` and copy it in.
 
 1. Write the task (`AUTHORING.md`). Confirm every citation resolves and every
    reproduction runs.
-2. Run `./scripts/validate-task.sh tasks/<task>` and clear every error.
-3. Fill `AUTHOR_NOTES.md`, including the contamination probe record and your
-   self-check disclosure — "not run" written explicitly if you ran none.
-4. Commit task code, provenance and notes. Save that SHA as `TASK_CODE_COMMIT`.
-5. Complete the contributor attestation in `attestations/<your-handle>.md`
+2. Run the self-check: at least three agent attempts, every answer graded
+   against the rubric you already committed, recorded in
+   `calibration/self-check.json` (`DIFFICULTY.md` §4). Harvest a failed answer
+   into `grading-examples.json`.
+3. Fill `AUTHOR_NOTES.md`, including the contamination probe record.
+4. Run `./scripts/validate-task.sh tasks/<task>` and clear every error.
+5. Commit task code, provenance and notes. Save that SHA as `TASK_CODE_COMMIT`.
+6. Complete the contributor attestation in `attestations/<your-handle>.md`
    against `TASK_CODE_COMMIT`.
-6. Send the handoff: private repository URL or ZIP, task ID, the full submission
+7. Send the handoff: private repository URL or ZIP, task ID, the full submission
    commit SHA, the approved proposal reference, and a short summary of the checks
    you performed. For an archive, include a SHA-256 checksum.
-7. Add `@xicovarisco` as a read collaborator, or send the archive through your
+8. Add `@xicovarisco` as a read collaborator, or send the archive through your
    assigned Askable channel.
 
 Never include API keys, access tokens, or local credential files.

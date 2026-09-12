@@ -74,10 +74,8 @@ into your task, your rubric, or your notes. Do not copy the terminal-task
 calibration pin: a result measured under different conditions is a self-check,
 not acceptance evidence.
 
-An exploratory screen of three attempts is a *kill* screen, not a measurement.
-Three attempts cannot separate a 20% success rate from a 50% one, which is the
-only distinction that matters. Treat 3/3 as "too easy, stop" and treat 0/3 as
-"worth measuring properly", and never report either as a difficulty estimate.
+Your own three attempts (§4) are a kill screen, not a measurement. Askable's run
+is the measurement.
 
 **A low success rate is only valuable when the task and the grading are sound.**
 Zero passes triggers investigation; it is not automatic acceptance. Failure
@@ -85,25 +83,76 @@ review asks which of these produced the failure: a real reasoning limitation,
 ambiguity in the question, missing context, broken execution, or a grading error.
 Only the first one counts.
 
-## 4. Self-checks
+## 4. The self-check: three attempts, three graded answers
 
-You may run an agentic attempt with whatever you already have — Claude Code,
-gemini-cli, Cursor, an API you already pay for. It is genuinely useful and we
-encourage it, but it is not required and it is not the acceptance measurement.
+**Required before submission.** Run the task at least three times with an agentic
+coding tool and grade every answer against your own rubric, criterion by
+criterion. Record it in `calibration/self-check.json`; the validator will not
+pass a task without it.
 
-If you run one, **the model's answer is worth more than its pass/fail.** Grade it
-against your own rubric, criterion by criterion. Two things fall out:
+Gemini 3.8 Flash is currently free in Gemini CLI and Antigravity, which is why
+this is a requirement rather than a suggestion. Use whatever you already have —
+Claude Code, Cursor, Codex CLI, an API you already pay for. The tool matters less
+than the discipline.
 
-- You find out whether your rubric can actually be applied by someone who is not
-  you. Most rubric defects surface here rather than at review.
-- An authentic wrong answer is a far better entry in `grading-examples.json` than
-  a flawed answer you invented. Real distractors have a texture that strawmen do
-  not.
+### What the three attempts are for, and what they are not for
 
-Disclose everything you ran: model and version, task revision, budget, every
-answer produced, and your per-criterion scores. Record "not run" explicitly if
-you ran nothing. Undisclosed self-checks are treated as concealment, not
-oversight.
+**They are not a difficulty measurement.** Three attempts cannot separate a 20%
+success rate from a 50% one, which is the only distinction that matters, and the
+agent you ran is not the harness Askable calibrates with. Never report your
+fraction as a difficulty estimate.
+
+They are a kill screen, read like this:
+
+| Attempts passing | What it means |
+|---|---|
+| 3 of 3 | Too easy. Do not submit. Fix the question or replace it. The validator fails this. |
+| 2 of 3 | Probably too easy. Expect it back. Fix it first. |
+| 0 or 1 of 3 | Proceed. This is not evidence that the task is hard, only that it is not obviously easy. |
+
+**The real payoff is the grading, not the fraction.** Grading three unfamiliar
+answers against your own rubric is the best rubric test available to you, and it
+is where most rubric defects surface: a criterion two people read differently, a
+`pass_condition` that turns out to be about phrasing, an essential fact nothing
+grades. Finding those here costs an hour. Finding them at review costs a round
+trip.
+
+And when an attempt fails, **that answer belongs in
+`evaluation/grading-examples.json`**, labelled `flawed_agent_<what it got
+wrong>`. An authentic wrong answer tests a rubric far better than one you wrote
+yourself, because you did not construct it with your own criteria in mind. The
+validator warns when a failed attempt has not been harvested this way.
+
+### Write the rubric first
+
+Commit `evaluation/rubric.json` **before** you run the self-check, and let the
+commit history show that order. It is the control that keeps this honest: an
+author who runs the agent first and writes criteria afterwards will write
+criteria the agent happens to fail, which manufactures difficulty rather than
+measuring it. We read the commit history.
+
+Changing the rubric after a self-check is fine and often correct — clarify an
+ambiguous `pass_condition`, add an `acceptable_alternative` the agent found.
+Deleting a criterion the agent met, or adding one because it missed something the
+question never asked for, is not.
+
+### Do not tune to a model
+
+The batch target, agent, budget and judge come from Askable and are not stable
+between batches — the terminal-task target moved two point releases in eight
+days. Do not hard-code a model into your task, your rubric, or your notes, and do
+not copy the terminal-task calibration pin. A result measured under different
+conditions is a self-check, not acceptance evidence.
+
+### Disclose everything
+
+`calibration/self-check.json` records the agent, the exact model version string
+the tool reports, the date, the task revision, the budget, every answer produced
+in full, and your per-criterion score for each. `authoritative` is always
+`false`.
+
+Record discarded attempts and why. Undisclosed runs are treated as concealment,
+not oversight.
 
 ## 5. Return and rejection
 

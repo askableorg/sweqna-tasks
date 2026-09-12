@@ -29,11 +29,25 @@ validator is right and this document is a bug.
 
 | Field | Rule |
 |---|---|
+| `mode` | `"container"` or `"source-only"`. Any task with a non-null `result.log` in `evidence.json` must be `"container"`. |
+| `network_mode` | Must be `"no-network"`. |
+| `source_modifications` | Every deviation from the pinned upstream revision. `"None."` if there are none — never empty. |
+
+**`mode: "container"` additionally requires** `environment/Dockerfile`, plus:
+
+| Field | Rule |
+|---|---|
 | `base_image_digest` | `name@sha256:<digest>`. A tag is not a pin. |
 | `architecture` | e.g. `linux/amd64`. |
 | `cpus`, `memory_mb`, `storage_mb` | What the task actually needs. |
-| `network_mode` | Must be `"no-network"`. |
-| `source_modifications` | Every deviation from the pinned upstream revision. `"None."` if there are none — never empty. |
+
+**`mode: "source-only"` instead requires** `source_acquisition`:
+
+| Field | Rule |
+|---|---|
+| `method` | `"git"` or `"archive"`. |
+| `script` | Task-relative path to the fetch script. Must exist. |
+| `archive_sha256` | 64-character SHA-256 of the retained source archive, so the tree verifies offline. |
 
 ---
 
@@ -87,6 +101,29 @@ warns and `AUTHOR_NOTES.md` must explain the count.
 | `answer_text` | The full answer. Required unless `answer_source` is set. |
 | `criteria` | One `{id, met, note}` per rubric criterion. Every criterion, every example. |
 | `explanation` | Why it passes or fails. Mandatory for failures, and must name the fact that is wrong. |
+
+---
+
+## `calibration/self-check.json`
+
+Required before submission; exempt only for tasks with `status: "example"`.
+
+| Field | Rule |
+|---|---|
+| `authoritative` | Always `false`. Askable's run is the authoritative one. |
+| `agent` | The harness you drove, e.g. `gemini-cli`, `claude-code`, `antigravity`. |
+| `model` / `model_version` | The model, and the exact version string the tool reports — not the marketing name. |
+| `date` | When you ran it. |
+| `task_revision` | Must equal `revision` in `task.json`. |
+| `budget` | Limits in force, e.g. `"free tier, default limits"`. |
+| `notes` | Anything blocking reconciliation with our numbers: rate limits, retries, discarded attempts and why. |
+| `attempts` | At least 3. Each `{id, answer_text, criteria}`. |
+| `attempts[].answer_text` | The agent's full answer. Not a summary. |
+| `attempts[].criteria` | One `{id, met, note}` per rubric criterion. Every criterion, every attempt. |
+
+An attempt counts as a pass when every `required` criterion is met. **All
+attempts passing is a validation error**, not a warning: the question is too
+easy. More than half passing is a warning.
 
 ---
 

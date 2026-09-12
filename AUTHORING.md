@@ -121,6 +121,39 @@ drop the criterion.
 
 ## 4. Build the environment
 
+### First decide: does the participant run the code, or read it?
+
+Two modes, set in `task.json` as `environment.mode`. The rule is not a judgement
+call, and the validator enforces it:
+
+| | `container` | `source-only` |
+|---|---|---|
+| The participant | runs the code | reads the code |
+| You ship | a Dockerfile pinned by digest | a `fetch-source.sh` and a checksummed archive |
+| Allowed when | always | **every** evidence record is source analysis |
+| Scaffold | `./scripts/new-task.sh my-task` | `./scripts/new-task.sh --source-only my-task` |
+
+**If a single evidence record has a non-null `result.log`, you need a
+container.** A runtime claim needs a runtime, and a claim you could not execute
+is a claim you did not verify.
+
+In practice that maps onto the categories. Root-Cause Analysis, Change
+Correctness, Security Behavior and API Integration nearly always need execution.
+Architecture and Code Onboarding questions are often settled entirely from the
+source, and those are the ones where `source-only` saves you a day of Docker work
+for nothing gained.
+
+Be honest with yourself about which you are writing. A source-only task is not a
+container task with the container skipped — it is a task whose answer genuinely
+rests on reading, and it has to survive the contamination probe without the
+crutch of runtime evidence. Questions answerable from pure source reading are, on
+average, easier and more contaminable. Expect more of them to die at §2.
+
+Askable handles harness packaging either way. You are not building the evaluation
+rig.
+
+### If you are shipping a container
+
 - **Pin everything.** Repository at a full commit SHA, base image by digest,
   dependencies by lockfile or exact version. Record architecture and resource
   requirements in `task.json`.
@@ -137,8 +170,19 @@ drop the criterion.
 - **Provide build, start, reset and smoke-test commands** in the task `README.md`.
   Run the smoke test in a fresh container and retain the output.
 
-A runnable container is the default. Discuss a source-only exception with Askable
-at proposal review.
+### If you are shipping source only
+
+- **`environment/fetch-source.sh`** clones the repository, checks out the full
+  SHA, strips `.git`, and produces a deterministic archive.
+- **Record the archive's SHA-256** in `environment.source_acquisition.archive_sha256`
+  so the tree can be verified later with no network.
+- **Say what the participant needs to read it.** If the answer depends on a
+  generated file, a build artefact, or a vendored dependency, either include it
+  or you are in container territory after all.
+
+State your mode in `PROPOSAL.md` and let Askable confirm it at scope approval.
+Discovering at submission that your source-only task needed a runtime is an
+expensive way to find out.
 
 ### Make the behaviour reachable on purpose
 
@@ -308,10 +352,17 @@ Write the paraphrase in a genuinely different register from your reference —
 different vocabulary, different order, a different route to the same evidence.
 That is the point of it.
 
-For the flawed answers, use the two wrong conclusions you wrote down in §2. If
-you ran a self-check and the model produced a wrong answer, **use that** — an
-authentic wrong answer is a better test of the rubric than one you constructed,
-because you did not write it with your own criteria in mind.
+For the flawed answers, use the two wrong conclusions you wrote down in §2.
+
+Then run the self-check (`DIFFICULTY.md` §4): three agent attempts, every answer
+graded against this rubric. **Commit the rubric before you run it** — the order
+is visible in your history and it is what keeps the exercise honest.
+
+When an attempt fails, add its answer to `grading-examples.json` labelled
+`flawed_agent_<what it got wrong>`. That is the best entry in the file: you did
+not construct it with your own criteria in mind, so it tests the rubric in a way
+a strawman cannot. Most rubric defects you would otherwise meet at review surface
+in this step.
 
 Askable checks your labels and uses separate responses to validate automated
 judging.
@@ -331,6 +382,7 @@ judging.
 | `evaluation/` | `rubric.json`, `grading-examples.json` |
 | `provenance.json` | Origin, version/hash, licence, permission basis for every asset |
 | `AUTHOR_NOTES.md` | Investigation summary, wrong conclusions, rubric mapping, contamination probe, effort log, limitations, self-check disclosure |
+| `calibration/self-check.json` | Three or more graded agent attempts, `authoritative: false` |
 | `attestations/` | Contributor declarations bound to the task revision |
 
 Field-by-field detail is in `schema/FIELDS.md`. Then:
@@ -354,6 +406,9 @@ Field-by-field detail is in `schema/FIELDS.md`. Then:
       essential requirement is covered.
 - [ ] Reference and paraphrase pass; two flawed answers fail for documented
       factual reasons.
+- [ ] Self-check run: at least three attempts, every answer graded, rubric
+      committed first. Not 3/3, and any failed answer harvested into
+      `grading-examples.json`.
 - [ ] All files present, JSON parses, paths and evidence IDs resolve.
 - [ ] Provenance, attestations, AI disclosure and actual effort recorded.
 - [ ] Handoff identifies the exact submission commit, checks performed, and known

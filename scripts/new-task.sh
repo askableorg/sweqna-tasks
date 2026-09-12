@@ -3,8 +3,19 @@ set -euo pipefail
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$ROOT_DIR"
 
+MODE="container"
+if [[ "${1:-}" == "--source-only" ]]; then
+  MODE="source-only"
+  shift
+fi
+
 if [[ $# -lt 1 ]]; then
-  echo "Usage: $0 <task-name>" >&2
+  echo "Usage: $0 [--source-only] <task-name>" >&2
+  echo >&2
+  echo "  container    (default) the participant runs the code. Required for any" >&2
+  echo "               question whose answer rests on runtime evidence." >&2
+  echo "  --source-only  the participant reads the code. Allowed only when every" >&2
+  echo "               evidence record is source analysis. See AUTHORING.md §4." >&2
   exit 1
 fi
 
@@ -20,7 +31,7 @@ if [[ -e "$TASK_DIR" ]]; then
   exit 1
 fi
 
-mkdir -p "$TASK_DIR"/{environment/src,reference/reproductions,evaluation,attestations}
+mkdir -p "$TASK_DIR"/{environment/src,reference/reproductions,evaluation,attestations,calibration}
 
 sed "s/TASK_NAME/${TASK_NAME}/g" templates/PROPOSAL.md > "$TASK_DIR/PROPOSAL.md"
 sed "s/TASK_NAME/${TASK_NAME}/g" templates/AUTHOR_NOTES.md > "$TASK_DIR/AUTHOR_NOTES.md"
@@ -45,7 +56,13 @@ cat > "$TASK_DIR/task.json" <<JSON
   },
   "ai_tools_used": [],
   "status": "draft",
-  "environment": {
+  "environment": ENVIRONMENT_BLOCK
+}
+JSON
+
+if [[ "$MODE" == "container" ]]; then
+  ENVIRONMENT_BLOCK='{
+    "mode": "container",
     "base_image_digest": "",
     "architecture": "linux/amd64",
     "cpus": 1,
@@ -53,9 +70,25 @@ cat > "$TASK_DIR/task.json" <<JSON
     "storage_mb": 4096,
     "network_mode": "no-network",
     "source_modifications": ""
-  }
-}
-JSON
+  }'
+else
+  ENVIRONMENT_BLOCK='{
+    "mode": "source-only",
+    "network_mode": "no-network",
+    "source_modifications": "",
+    "source_acquisition": {
+      "method": "git",
+      "script": "environment/fetch-source.sh",
+      "archive_sha256": ""
+    }
+  }'
+fi
+python3 - "$TASK_DIR/task.json" "$ENVIRONMENT_BLOCK" <<'PY'
+import json, sys
+path, block = sys.argv[1], sys.argv[2]
+document = json.loads(open(path).read().replace('"environment": ENVIRONMENT_BLOCK', '"environment": ' + block))
+open(path, "w").write(json.dumps(document, indent=2) + "\n")
+PY
 
 cat > "$TASK_DIR/provenance.json" <<'JSON'
 {
@@ -187,7 +220,10 @@ docker run --rm --network none sweqa-${TASK_NAME} <command>
 <!-- One line per artefact. -->
 MD
 
-cat > "$TASK_DIR/environment/Dockerfile" <<'DOCKER'
+cp templates/self-check.json "$TASK_DIR/calibration/self-check.json"
+
+if [[ "$MODE" == "container" ]]; then
+  cat > "$TASK_DIR/environment/Dockerfile" <<'DOCKER'
 # Pin by digest, not tag.
 FROM python@sha256:REPLACE_WITH_PINNED_DIGEST
 
@@ -199,8 +235,13 @@ COPY src/ /task/src/
 
 CMD ["sleep", "infinity"]
 DOCKER
+else
+  cp templates/fetch-source.sh "$TASK_DIR/environment/fetch-source.sh"
+  chmod +x "$TASK_DIR/environment/fetch-source.sh"
+  rmdir "$TASK_DIR/environment/src" 2>/dev/null || true
+fi
 
-echo "Created ${TASK_DIR}"
+echo "Created ${TASK_DIR} (${MODE})"
 echo
 echo "Next:"
 echo "  1. Fill ${TASK_DIR}/PROPOSAL.md and send it through Askable. Wait for approval."

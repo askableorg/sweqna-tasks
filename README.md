@@ -42,7 +42,9 @@ agreement. Do not use this repository to create tasks for another purpose.
 2. **Create your own private GitHub repository** from your clone. All your work
    lives there, with real incremental commit history — we review that history as
    part of acceptance.
-3. **Scaffold a task:** `./scripts/new-task.sh my-task`.
+3. **Scaffold a task:** `./scripts/new-task.sh my-task`, or
+   `./scripts/new-task.sh --source-only my-task` for a question the participant
+   answers by reading rather than running.
 4. **Fill `PROPOSAL.md` and send it through Askable.** This is a checkpoint, not
    a formality: it is where the repository and the scope get approved, and it is
    the cheapest place to find out the question does not work. It requires the
@@ -50,11 +52,16 @@ agreement. Do not use this repository to create tasks for another purpose.
    before approval. One approved task at a time.
 5. **Build the environment, investigate, and write the answer** with evidence
    records that cite real paths, symbols and line ranges at the pinned commit.
-6. **Write the rubric, then test it** against four answers: your reference, a
-   correct paraphrase, and two plausible flawed answers.
-7. **Validate:** `./scripts/validate-task.sh tasks/my-task` — clean before you
+   Docker is needed only when the question rests on runtime evidence — see
+   `AUTHORING.md` §4.
+6. **Write the rubric and commit it**, then test it against four answers: your
+   reference, a correct paraphrase, and two plausible flawed answers.
+7. **Run the self-check:** three agent attempts, every answer graded against that
+   rubric (`DIFFICULTY.md` §4). Gemini 3.8 Flash is free in Gemini CLI and
+   Antigravity, so this costs time, not money.
+8. **Validate:** `./scripts/validate-task.sh tasks/my-task` — clean before you
    submit.
-8. **Submit** (`CONTRIBUTING.md`), then either add Askable's reviewer account
+9. **Submit** (`CONTRIBUTING.md`), then either add Askable's reviewer account
    (`@xicovarisco`) as a read collaborator on your private repository, or send an
    archive.
 
@@ -70,22 +77,29 @@ The validator checks what a reviewer would otherwise check by hand: every
 required file present, every JSON parsing, every cited path and symbol existing
 with the line range inside the file, every `evidence_ids` reference resolving,
 every rubric criterion labelled in every grading example, each example's
-`expected_outcome` agreeing with its own labels, and the Dockerfile not copying
-`reference/` or `evaluation/` into the participant image.
+`expected_outcome` agreeing with its own labels, the environment mode matching
+the evidence it carries, three graded self-check attempts that are not 3/3, and
+the Dockerfile not copying `reference/` or `evaluation/` into the participant
+image.
 
 **Green is the precondition for review, not evidence that the task is any good.**
 It cannot tell you whether the question is interesting or the answer is right.
 
 ## What Askable does, and what you do not have to
 
-You do not need API keys, an agent harness, or the production judge. Askable runs
-the authoritative calibration and judge validation against the designated target
-for your batch. You run the contamination probe — it is free, takes one message,
-and is required.
+Askable runs the authoritative calibration and judge validation against the
+designated target for your batch, and handles harness packaging. You do not need
+the production judge, paid API access, or the batch's target model.
 
-Disclose any self-check you do run: model and version, task revision, budget,
-every answer produced, and your per-criterion scores. An honest "not run" is
-fine. An undisclosed run is not.
+Two things are on you, and both are free:
+
+- **The contamination probe.** One message, no repository access. Required at
+  proposal (`DIFFICULTY.md` §1).
+- **The self-check.** Three agent attempts, every answer graded against your
+  rubric, recorded in `calibration/self-check.json` (`DIFFICULTY.md` §4). The
+  fraction is a kill screen, not a measurement. The grading is the point.
+
+Docker is required only for tasks whose answers rest on runtime evidence.
 
 ## Repository layout
 
@@ -94,5 +108,5 @@ fine. An undisclosed run is not.
 | `AUTHORING.md` `DIFFICULTY.md` `CONTRIBUTING.md` `CONTEXT.md` | The documents above |
 | `schema/FIELDS.md` | Field-by-field reference for every JSON artefact |
 | `scripts/` | `new-task.sh`, `validate-task.sh`, `validate-all.sh`, `validate_task.py` |
-| `templates/` | `PROPOSAL.md`, `instruction.md`, `AUTHOR_NOTES.md`, attestation |
+| `templates/` | `PROPOSAL.md`, `instruction.md`, `AUTHOR_NOTES.md`, `self-check.json`, `fetch-source.sh`, attestation |
 | `tasks/hello-cache-py/` | The worked example — reference only, not eligible |

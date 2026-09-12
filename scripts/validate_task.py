@@ -29,7 +29,6 @@ REQUIRED_FILES = (
     "provenance.json",
     "README.md",
     "AUTHOR_NOTES.md",
-    "environment/Dockerfile",
     "reference/answer.md",
     "reference/evidence.json",
     "evaluation/rubric.json",
@@ -46,10 +45,12 @@ ATTESTATION_CHECKS = (
     "- [x] I hand-wrote the question and the reference answer",
     "- [x] I personally verified every claim, citation, and experimental result",
     "- [x] I ran the no-repository contamination probe",
+    "- [x] I committed the rubric before running the self-check",
     "- [x] I disclosed every AI tool used",
     "- [x] I own or have authority to contribute",
     "- [x] I assign all right, title, and interest",
 )
+MIN_SELF_CHECK_ATTEMPTS = 3
 SHA_RE = re.compile(r"^[0-9a-f]{40}$")
 LINES_RE = re.compile(r"^(\d+)(?:-(\d+))?$")
 
@@ -137,10 +138,24 @@ def check_task_json(task: Path, report: Report) -> dict[str, Any]:
         report.error("task.json: repo_commit must be a full 40-character commit SHA")
 
     environment = document.get("environment")
-    if isinstance(environment, dict):
-        if environment.get("network_mode") != "no-network":
-            report.error('task.json: environment.network_mode must be "no-network"')
-        for field in ("base_image_digest", "architecture", "source_modifications"):
+    if not isinstance(environment, dict):
+        report.error("task.json: environment must be an object")
+        return document
+
+    if environment.get("network_mode") != "no-network":
+        report.error('task.json: environment.network_mode must be "no-network"')
+    if not str(environment.get("source_modifications", "")).strip():
+        report.error("task.json: environment.source_modifications must be recorded")
+
+    mode = environment.get("mode")
+    if mode not in ("container", "source-only"):
+        report.error('task.json: environment.mode must be "container" or "source-only"')
+        return document
+
+    if mode == "container":
+        if not (task / "environment" / "Dockerfile").is_file():
+            report.error('environment/Dockerfile: missing (required when mode is "container")')
+        for field in ("base_image_digest", "architecture"):
             if not str(environment.get(field, "")).strip():
                 report.error(f"task.json: environment.{field} must be recorded")
         digest = str(environment.get("base_image_digest", ""))
@@ -148,8 +163,122 @@ def check_task_json(task: Path, report: Report) -> dict[str, Any]:
             message = "task.json: environment.base_image_digest is not a real digest"
             report.warn(message) if is_example else report.error(message)
     else:
-        report.error("task.json: environment must be an object")
+        acquisition = environment.get("source_acquisition")
+        if not require_fields(
+            acquisition, ("method", "script", "archive_sha256"),
+            "task.json: environment.source_acquisition", report
+        ):
+            return document
+        script = str(acquisition.get("script", ""))
+        if script and not (task / script).is_file():
+            report.error(f"task.json: source_acquisition.script does not exist — {script}")
+        checksum = str(acquisition.get("archive_sha256", ""))
+        if not re.fullmatch(r"[0-9a-f]{64}", checksum) and not is_example:
+            report.error(
+                "task.json: source_acquisition.archive_sha256 must be a 64-character "
+                "SHA-256 of the retained source archive"
+            )
     return document
+
+
+def check_mode_against_evidence(
+    document: dict[str, Any], evidence: dict[str, dict[str, Any]], report: Report
+) -> None:
+    """A runtime claim needs a runtime. Source-only mode cannot carry one."""
+    environment = document.get("environment")
+    if not isinstance(environment, dict) or environment.get("mode") != "source-only":
+        return
+    executed = sorted(
+        identifier for identifier, record in evidence.items()
+        if isinstance(record.get("result"), dict) and record["result"].get("log") is not None
+    )
+    if executed:
+        report.error(
+            'task.json: environment.mode is "source-only" but '
+            + ", ".join(executed)
+            + " carries executed evidence. Any task with a runtime claim needs "
+            'mode "container".'
+        )
+
+
+def check_self_check(
+    task: Path, document: dict[str, Any], criteria: list[dict[str, Any]], report: Report
+) -> None:
+    """The self-check is three graded answers, not a pass rate."""
+    path = task / "calibration" / "self-check.json"
+    if document.get("status") == "example":
+        if path.is_file():
+            report.warn("calibration/self-check.json: present on an example task")
+        return
+    if not path.is_file():
+        report.error(
+            "calibration/self-check.json: missing. Run at least three attempts and "
+            "grade each answer against your own rubric (DIFFICULTY.md §4)."
+        )
+        return
+
+    record = load_json(path, report)
+    if not record:
+        return
+    if not require_fields(
+        record, ("authoritative", "agent", "model", "model_version", "date",
+                 "task_revision", "attempts"),
+        "self-check.json", report
+    ):
+        return
+    if record["authoritative"] is not False:
+        report.error("self-check.json: authoritative must be false — Askable runs the authoritative calibration")
+    if record.get("task_revision") != document.get("revision"):
+        report.error(
+            f"self-check.json: task_revision {record.get('task_revision')} does not match "
+            f"task.json revision {document.get('revision')}"
+        )
+
+    attempts = record["attempts"]
+    if not isinstance(attempts, list) or len(attempts) < MIN_SELF_CHECK_ATTEMPTS:
+        report.error(f"self-check.json: at least {MIN_SELF_CHECK_ATTEMPTS} attempts are required")
+        return
+
+    rubric_ids = {c["id"] for c in criteria if isinstance(c, dict) and "id" in c}
+    required_ids = {c["id"] for c in criteria if isinstance(c, dict) and c.get("required") is True}
+    passes = 0
+    for index, attempt in enumerate(attempts):
+        label = f"self-check.json attempts[{index}]"
+        if not require_fields(attempt, ("id", "answer_text", "criteria"), label, report):
+            continue
+        if not str(attempt.get("answer_text") or "").strip():
+            report.error(f"{label}: answer_text must be the full answer the agent produced")
+        labelled = {c["id"]: c for c in attempt["criteria"] if isinstance(c, dict) and "id" in c}
+        missing = rubric_ids - set(labelled)
+        if missing:
+            report.error(f"{label}: unlabelled criteria — {', '.join(sorted(missing))}")
+            continue
+        if all(labelled[i].get("met") for i in required_ids):
+            passes += 1
+
+    if passes == len(attempts):
+        report.error(
+            f"self-check.json: the agent passed {passes}/{len(attempts)} attempts. "
+            "The question is too easy — fix or replace it rather than submitting it."
+        )
+    elif passes * 2 > len(attempts):
+        report.warn(
+            f"self-check.json: the agent passed {passes}/{len(attempts)}. Likely too easy; "
+            "expect this to come back."
+        )
+
+    if passes < len(attempts):
+        labels = {
+            str(e.get("label")) for e in
+            (load_json(task / "evaluation" / "grading-examples.json", Report()) or {}).get("examples", [])
+            if isinstance(e, dict)
+        }
+        if not any(label.startswith("flawed_agent") for label in labels):
+            report.warn(
+                "an attempt failed, so one of its answers belongs in grading-examples.json "
+                'labelled "flawed_agent_<what it got wrong>" — a real wrong answer tests the '
+                "rubric better than one you wrote"
+            )
 
 
 def check_evidence(task: Path, report: Report) -> dict[str, dict[str, Any]]:
@@ -347,10 +476,12 @@ def validate(task: Path) -> Report:
         report.error(f"{task}: not a directory")
         return report
     check_structure(task, report)
-    check_task_json(task, report)
+    document = check_task_json(task, report)
     evidence = check_evidence(task, report)
+    check_mode_against_evidence(document, evidence, report)
     criteria = check_rubric(task, evidence, report)
     check_grading_examples(task, criteria, report)
+    check_self_check(task, document, criteria, report)
     check_leakage(task, report)
     check_provenance(task, report)
     return report

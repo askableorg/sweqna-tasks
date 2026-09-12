@@ -5,16 +5,21 @@
   "task_type": "SWE_QA",
   "verification_method": "RUBRIC",
   "category": "Root-Cause Analysis",
-  "primary_languages": ["Python"],
+  "primary_languages": [
+    "Python"
+  ],
   "repo_url": "https://github.com/askableorg/sweqna-tasks",
   "repo_commit": "TASK_CODE_COMMIT",
   "author": {
     "name": "Askable Labs",
     "github": "askableorg"
   },
-  "ai_tools_used": ["claude-code"],
+  "ai_tools_used": [
+    "claude-code"
+  ],
   "status": "example",
   "environment": {
+    "mode": "container",
     "base_image_digest": "python@sha256:REPLACE_WITH_PINNED_DIGEST",
     "architecture": "linux/amd64",
     "cpus": 1,
