@@ -1,13 +1,18 @@
 # Proposal: TASK_NAME
 
-Send this through Askable before you do substantial authoring. One approved task
-at a time. Scope approval takes a day or two; authoring against an unapproved
-repository is the most expensive mistake available to you.
+**This file is the record, not the gate.** You propose by message, in six lines
+(the format is in your invitation). Once Askable approves it, paste the approval
+into this file, fill in the rest, and commit it. That way the thing you were
+approved for is in the repository next to the thing you built.
+
+One approved task at a time. Authoring against an unapproved repository is the
+most expensive mistake available to you.
 
 ## Repository
 
 - **URL:**
-- **Full commit SHA:**
+- **Full commit SHA:** pinned when you start authoring, not at proposal. Full 40
+  characters; everything you cite must resolve at this revision.
 - **Licence:**
 - **Primary language(s):**
 - **Your familiarity:** how you know this project — contributed, ran it in
