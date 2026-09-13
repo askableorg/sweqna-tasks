@@ -12,6 +12,11 @@ repository is the most expensive mistake available to you.
 - **Primary language(s):**
 - **Your familiarity:** how you know this project — contributed, ran it in
   production, read it closely. Be specific; "I've used it" is not familiarity.
+- **Your contributor relationship, if any:** what you have contributed, and
+  confirmation that the question is not about code you wrote or reviewed
+  (`AUTHORING.md` §2).
+- **Licence flag:** permissive, or copyleft? Copyleft needs a decision before you
+  start. AGPL is out.
 
 ## Question
 

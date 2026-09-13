@@ -51,6 +51,13 @@ twelve would have meant splitting R03 into one criterion per compared value, or
 adding trivia about `keys()` — both of which make the rubric look thorough and
 grade worse. A full task on a real repository should hit the target honestly.
 
+## Source relationship
+
+The `cachelib` package was written for this example, so there is no upstream
+project and no contributor relationship to declare. A real task records here
+which project the author contributes to, what they contributed, and confirmation
+that the question is not about code they wrote or reviewed (`AUTHORING.md` §2).
+
 ## Contamination probe
 
 **Not applicable to this example, and recorded as such rather than skipped.** The

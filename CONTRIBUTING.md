@@ -43,6 +43,21 @@ Record every third-party dependency, code sample, dataset, binary and fixture in
 or content hash, and an explanation of why its terms permit Askable's intended
 AI-training use.
 
+**Licence, and why the container is not the question.** Packaging a repository
+into a Docker image is redistribution, but so is handing over the source — the
+container only bundles it with its dependencies. Every benchmark in this space
+ships Docker images of open-source repositories pinned to a commit. What decides
+the answer is the licence, not the packaging.
+
+Permissive licences (MIT, Apache-2.0, BSD) are straightforward: redistribute with
+the notice intact and record why the terms permit AI-training use. Copyleft needs
+a decision before you start, not at submission, because distributing an image
+containing GPL code carries the source-provision obligation. **AGPL is out.** If
+your candidate repository is copyleft, raise it in the proposal and wait.
+
+Note also that a base image redistributes hundreds of OS packages of its own.
+That is normal and expected; it is in the chain, so pin it by digest.
+
 Use an empty `third_party_material` array only when the task genuinely contains
 none. Do not include anything whose rights are uncertain, and do not include
 employer code or private assets without approval and the authority to contribute

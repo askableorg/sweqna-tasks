@@ -76,6 +76,27 @@ the working repository private. Askable confirms scope, deadline, budget and
 submission location — use the assignment details you are given rather than dates
 carried over from an older brief.
 
+### If you contribute to the project
+
+Contributing to a repository is the best possible reason to know it well, and it
+creates one specific hazard that is invisible at review.
+
+**You may not write a question about code you personally wrote or reviewed.** Not
+because of bias, but because of where the answer lives. If you wrote the guard,
+you know why it is there from the design discussion, the PR thread, or a
+conversation that never reached the repository. The question will feel perfectly
+discoverable to you and will not be, and nobody finds out until the independent
+solver cannot get there. That fails the rule that a conclusion must be verifiable
+from the supplied source with no private knowledge.
+
+Anything else in the project is fair game, and your familiarity with it is an
+advantage. Declare the relationship in `AUTHOR_NOTES.md` — which project, what
+you contributed, and how you know the areas your question touches — and the
+attestation asks you to confirm the boundary.
+
+The same reasoning applies more sharply to employer code: do not include it
+without approval and the authority to contribute it.
+
 ### Originality and source use
 
 Prefer approved, less widely studied projects you know well. Disclose related

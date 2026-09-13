@@ -18,6 +18,14 @@
 
 <!-- If the rubric is outside 10–15 criteria, explain the count here. -->
 
+## Source relationship
+
+<!--
+Do you contribute to this project? What have you contributed, and how do you know
+the areas this question touches? Confirm the question is not about code you wrote
+or reviewed. Write "no relationship" if that is the case.
+-->
+
 ## Contamination probe
 
 - **Model and version:**
