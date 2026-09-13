@@ -66,7 +66,7 @@ rejects-it.py` and copy it in.
    reproduction runs.
 2. Run the self-check: at least three agent attempts, every answer graded
    against the rubric you already committed, recorded in
-   `calibration/self-check.json` (`DIFFICULTY.md` §4). Harvest a failed answer
+   `calibration/self-check.json` (`DIFFICULTY.md` §5). Harvest a failed answer
    into `grading-examples.json`.
 3. Fill `AUTHOR_NOTES.md`, including the contamination probe record.
 4. Run `./scripts/validate-task.sh tasks/<task>` and clear every error.

@@ -57,7 +57,7 @@ agreement. Do not use this repository to create tasks for another purpose.
 6. **Write the rubric and commit it**, then test it against four answers: your
    reference, a correct paraphrase, and two plausible flawed answers.
 7. **Run the self-check:** three agent attempts, every answer graded against that
-   rubric (`DIFFICULTY.md` §4). Gemini 3.8 Flash is free in Gemini CLI and
+   rubric (`DIFFICULTY.md` §5). Gemini 3.8 Flash is free in Gemini CLI and
    Antigravity, so this costs time, not money.
 8. **Validate:** `./scripts/validate-task.sh tasks/my-task` — clean before you
    submit.
@@ -96,7 +96,7 @@ Two things are on you, and both are free:
 - **The contamination probe.** One message, no repository access. Required at
   proposal (`DIFFICULTY.md` §1).
 - **The self-check.** Three agent attempts, every answer graded against your
-  rubric, recorded in `calibration/self-check.json` (`DIFFICULTY.md` §4). The
+  rubric, recorded in `calibration/self-check.json` (`DIFFICULTY.md` §5). The
   fraction is a kill screen, not a measurement. The grading is the point.
 
 Docker is required only for tasks whose answers rest on runtime evidence.

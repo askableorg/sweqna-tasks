@@ -50,6 +50,9 @@ ATTESTATION_CHECKS = (
     "- [x] I own or have authority to contribute",
     "- [x] I assign all right, title, and interest",
 )
+# Execution is a difficulty mechanism, not a verification aid (DIFFICULTY.md §2).
+# Only these two categories are routinely settled by reading.
+SOURCE_ONLY_CATEGORIES = {"Architecture", "Code Onboarding"}
 MIN_SELF_CHECK_ATTEMPTS = 3
 SHA_RE = re.compile(r"^[0-9a-f]{40}$")
 LINES_RE = re.compile(r"^(\d+)(?:-(\d+))?$")
@@ -163,12 +166,25 @@ def check_task_json(task: Path, report: Report) -> dict[str, Any]:
             message = "task.json: environment.base_image_digest is not a real digest"
             report.warn(message) if is_example else report.error(message)
     else:
+        if document.get("category") not in SOURCE_ONLY_CATEGORIES:
+            report.error(
+                'task.json: environment.mode "source-only" is allowed only for '
+                + " and ".join(sorted(SOURCE_ONLY_CATEGORIES))
+                + f" questions, not {document.get('category')!r}. Questions in the "
+                "other categories are settled by running the code (DIFFICULTY.md §2)."
+            )
         acquisition = environment.get("source_acquisition")
         if not require_fields(
-            acquisition, ("method", "script", "archive_sha256"),
+            acquisition, ("method", "script", "archive_sha256", "rationale"),
             "task.json: environment.source_acquisition", report
         ):
             return document
+        if len(str(acquisition.get("rationale", "")).split()) < 15:
+            report.error(
+                "task.json: source_acquisition.rationale must say why reading "
+                "settles this question and what running the code would add that "
+                "the source does not. Askable signs this off at proposal."
+            )
         script = str(acquisition.get("script", ""))
         if script and not (task / script).is_file():
             report.error(f"task.json: source_acquisition.script does not exist — {script}")
@@ -213,7 +229,7 @@ def check_self_check(
     if not path.is_file():
         report.error(
             "calibration/self-check.json: missing. Run at least three attempts and "
-            "grade each answer against your own rubric (DIFFICULTY.md §4)."
+            "grade each answer against your own rubric (DIFFICULTY.md §5)."
         )
         return
 

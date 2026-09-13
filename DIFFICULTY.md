@@ -34,7 +34,82 @@ That said, prefer approved, less widely studied projects you know well: they
 start further from the training distribution, and the probe is more likely to
 come back clean.
 
-## 2. What makes a question hard for the right reasons
+## 2. Where this bar comes from
+
+Three reference points. The bar below is set against them rather than invented,
+and it is worth ten minutes before you spend fifteen hours.
+
+### SWE-QA — Peng et al., September 2025
+
+The first academic benchmark for this task type: 576 question-answer pairs mined
+from GitHub issues across 11 repositories. **No container and no execution.** The
+agent gets `ReadFile`, `GetRepoStructure`, a RAG-backed search, and `cat`/`grep`.
+Answers are scored by a GPT-5 judge across five dimensions — correctness,
+completeness, relevance, clarity, reasoning — on a 5-point scale, alongside three
+human engineers on a 10-point scale.
+
+*What to take from it:* this is the floor, and its weakness is the judging. A
+scalar score across five dimensions cannot tell you whether a specific fact was
+established. That is why we grade binary criteria instead.
+
+[arXiv 2509.14635](https://arxiv.org/abs/2509.14635)
+
+### SWE-QA-Pro — Cai et al., March 2026
+
+The same idea rebuilt on long-tail repositories with executable environments
+repurposed from SWE-Rebench, which ships a Docker recipe per task. The agent gets
+scoped file and directory inspection plus *constrained read-only* command-line
+actions. Validation is triple: an agent answering inside the sandbox, human
+annotators independently exploring the codebase, then an LLM judge.
+
+*What to take from it:* their difficulty calibration filters out questions
+"solvable via memorization or pretraining artifacts", keeping only those that
+require genuine codebase interaction. That is §1 of this document, arrived at
+independently, and it is why the contamination probe is mandatory rather than
+advisory.
+
+[arXiv 2603.16124](https://arxiv.org/abs/2603.16124)
+
+### SWE Atlas Codebase Q&A — Scale
+
+The production benchmark closest to what we are building, and the one that
+actually sets the bar.
+
+**Its environments.** Engineers "build a reproducible Docker image pinned to a
+specific commit, with all dependencies pre-installed, such that the software can
+be built, run, and tested". At evaluation the agent works inside that container
+with the repository mounted and standard shell tools, builds and runs the
+software, runs experiments, and then answers.
+
+**Its questions.** "Simple codebase exploration is insufficient to solve these."
+They "require running the software, tracing execution across multiple files, and
+synthesizing findings."
+
+**Its grading.** Human-written rubrics averaging 12.3 criteria, each scored met
+or unmet independently by an LLM judge, with three experts reviewing every rubric
+before it is used.
+
+[labs.scale.com/leaderboard/sweatlas-qna](https://labs.scale.com/leaderboard/sweatlas-qna)
+
+### What follows, and why this repository looks the way it does
+
+- **Rubrics are binary and hand-written, 10 to 15 criteria.** That is the
+  production reference, not the papers. `AUTHORING.md` §8.
+- **Execution is a difficulty mechanism, not a verification aid.** The hardest
+  questions in this task type are hard because reading is not enough. This is the
+  reason `source-only` mode is narrow rather than a general convenience —
+  `AUTHORING.md` §4.
+- **The frontier sits around 63%.** The best models resolve roughly that share of
+  SWE Atlas Codebase Q&A tasks. A question a strong model answers first time is
+  worth nothing to us, and building ones a Flash-class model misses is genuinely
+  above the public state of the art.
+
+One caveat on that last number, so nobody quotes it loosely. SWE Atlas counts a
+task resolved only when the answer meets **every** rubric item. We let a task
+pass on its required criteria and treat optional ones as diagnostic, so our pass
+rates and theirs are not directly comparable.
+
+## 3. What makes a question hard for the right reasons
 
 Hard because the answer takes investigation:
 
@@ -64,7 +139,7 @@ The test to apply to yourself: if a model fails your task, will the transcript
 show it reasoning competently and reaching a wrong conclusion, or will it show it
 guessing at what you wanted? Only the first is worth anything.
 
-## 3. What Askable measures, and what you do not have to
+## 4. What Askable measures, and what you do not have to
 
 Askable supplies the target model, agent, budget, judge and eligibility rules for
 each batch, and runs the authoritative calibration. **Those parameters are not in
@@ -74,7 +149,7 @@ into your task, your rubric, or your notes. Do not copy the terminal-task
 calibration pin: a result measured under different conditions is a self-check,
 not acceptance evidence.
 
-Your own three attempts (§4) are a kill screen, not a measurement. Askable's run
+Your own three attempts (§5) are a kill screen, not a measurement. Askable's run
 is the measurement.
 
 **A low success rate is only valuable when the task and the grading are sound.**
@@ -83,7 +158,7 @@ review asks which of these produced the failure: a real reasoning limitation,
 ambiguity in the question, missing context, broken execution, or a grading error.
 Only the first one counts.
 
-## 4. The self-check: three attempts, three graded answers
+## 5. The self-check: three attempts, three graded answers
 
 **Required before submission.** Run the task at least three times with an agentic
 coding tool and grade every answer against your own rubric, criterion by
@@ -154,7 +229,7 @@ in full, and your per-criterion score for each. `authoritative` is always
 Record discarded attempts and why. Undisclosed runs are treated as concealment,
 not oversight.
 
-## 5. Return and rejection
+## 6. Return and rejection
 
 A task comes back for: a missing or incorrect answer; facts the participant
 cannot discover; a copied or lightly rewritten question; unresolved source

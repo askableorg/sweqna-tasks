@@ -29,7 +29,7 @@ validator is right and this document is a bug.
 
 | Field | Rule |
 |---|---|
-| `mode` | `"container"` or `"source-only"`. Any task with a non-null `result.log` in `evidence.json` must be `"container"`. |
+| `mode` | `"container"` or `"source-only"`. Any task with a non-null `result.log` in `evidence.json` must be `"container"`, and `"source-only"` is allowed only for `Architecture` and `Code Onboarding` categories. See `DIFFICULTY.md` §2 for why. |
 | `network_mode` | Must be `"no-network"`. |
 | `source_modifications` | Every deviation from the pinned upstream revision. `"None."` if there are none — never empty. |
 
@@ -48,6 +48,7 @@ validator is right and this document is a bug.
 | `method` | `"git"` or `"archive"`. |
 | `script` | Task-relative path to the fetch script. Must exist. |
 | `archive_sha256` | 64-character SHA-256 of the retained source archive, so the tree verifies offline. |
+| `rationale` | At least 15 words on why reading settles this question and what running the code would add that the source does not. Askable signs this off at proposal. |
 
 ---
 

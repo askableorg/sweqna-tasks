@@ -130,24 +130,30 @@ call, and the validator enforces it:
 |---|---|---|
 | The participant | runs the code | reads the code |
 | You ship | a Dockerfile pinned by digest | a `fetch-source.sh` and a checksummed archive |
-| Allowed when | always | **every** evidence record is source analysis |
+| Allowed when | always | **every** evidence record is source analysis, **and** the category is Architecture or Code Onboarding |
 | Scaffold | `./scripts/new-task.sh my-task` | `./scripts/new-task.sh --source-only my-task` |
 
 **If a single evidence record has a non-null `result.log`, you need a
 container.** A runtime claim needs a runtime, and a claim you could not execute
 is a claim you did not verify.
 
-In practice that maps onto the categories. Root-Cause Analysis, Change
-Correctness, Security Behavior and API Integration nearly always need execution.
-Architecture and Code Onboarding questions are often settled entirely from the
-source, and those are the ones where `source-only` saves you a day of Docker work
-for nothing gained.
+**And source-only is restricted to Architecture and Code Onboarding.** Root-Cause
+Analysis, Change Correctness, Security Behavior and API Integration are settled by
+running the code; the validator rejects source-only in those categories.
 
-Be honest with yourself about which you are writing. A source-only task is not a
-container task with the container skipped — it is a task whose answer genuinely
-rests on reading, and it has to survive the contamination probe without the
-crutch of runtime evidence. Questions answerable from pure source reading are, on
-average, easier and more contaminable. Expect more of them to die at §2.
+That restriction is not house preference. The production benchmark in this task
+type builds a Docker image per task so the software "can be built, run, and
+tested", and states outright that "simple codebase exploration is insufficient to
+solve these" — execution is how it makes questions hard, not how it checks them
+afterwards (`DIFFICULTY.md` §2). A question you can settle by reading is, on
+average, an easier and more contaminable question.
+
+So source-only is the narrow case, not the convenient one. It is for a task whose
+answer genuinely rests on reading and which survives the contamination probe
+without the crutch of runtime evidence. You write down why in
+`environment.source_acquisition.rationale`, and Askable signs it off at proposal
+rather than taking your word for it. Expect more source-only proposals to die at
+§2 than container ones.
 
 Askable handles harness packaging either way. You are not building the evaluation
 rig.
@@ -354,7 +360,7 @@ That is the point of it.
 
 For the flawed answers, use the two wrong conclusions you wrote down in §2.
 
-Then run the self-check (`DIFFICULTY.md` §4): three agent attempts, every answer
+Then run the self-check (`DIFFICULTY.md` §5): three agent attempts, every answer
 graded against this rubric. **Commit the rubric before you run it** — the order
 is visible in your history and it is what keeps the exercise honest.
 

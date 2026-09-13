@@ -15,7 +15,8 @@ if [[ $# -lt 1 ]]; then
   echo "  container    (default) the participant runs the code. Required for any" >&2
   echo "               question whose answer rests on runtime evidence." >&2
   echo "  --source-only  the participant reads the code. Allowed only when every" >&2
-  echo "               evidence record is source analysis. See AUTHORING.md §4." >&2
+  echo "               evidence record is source analysis AND the category is" >&2
+  echo "               Architecture or Code Onboarding. See AUTHORING.md §4." >&2
   exit 1
 fi
 
@@ -46,7 +47,7 @@ cat > "$TASK_DIR/task.json" <<JSON
   "revision": 1,
   "task_type": "SWE_QA",
   "verification_method": "RUBRIC",
-  "category": "Root-Cause Analysis",
+  "category": "CATEGORY_DEFAULT",
   "primary_languages": ["Python"],
   "repo_url": "",
   "repo_commit": "",
@@ -61,6 +62,7 @@ cat > "$TASK_DIR/task.json" <<JSON
 JSON
 
 if [[ "$MODE" == "container" ]]; then
+  CATEGORY_DEFAULT="Root-Cause Analysis"
   ENVIRONMENT_BLOCK='{
     "mode": "container",
     "base_image_digest": "",
@@ -72,6 +74,7 @@ if [[ "$MODE" == "container" ]]; then
     "source_modifications": ""
   }'
 else
+  CATEGORY_DEFAULT="Architecture"
   ENVIRONMENT_BLOCK='{
     "mode": "source-only",
     "network_mode": "no-network",
@@ -79,14 +82,17 @@ else
     "source_acquisition": {
       "method": "git",
       "script": "environment/fetch-source.sh",
-      "archive_sha256": ""
+      "archive_sha256": "",
+      "rationale": ""
     }
   }'
 fi
-python3 - "$TASK_DIR/task.json" "$ENVIRONMENT_BLOCK" <<'PY'
+python3 - "$TASK_DIR/task.json" "$ENVIRONMENT_BLOCK" "$CATEGORY_DEFAULT" <<'PY'
 import json, sys
-path, block = sys.argv[1], sys.argv[2]
-document = json.loads(open(path).read().replace('"environment": ENVIRONMENT_BLOCK', '"environment": ' + block))
+path, block, category = sys.argv[1], sys.argv[2], sys.argv[3]
+raw = open(path).read().replace('"environment": ENVIRONMENT_BLOCK', '"environment": ' + block)
+document = json.loads(raw)
+document["category"] = category
 open(path, "w").write(json.dumps(document, indent=2) + "\n")
 PY
 
