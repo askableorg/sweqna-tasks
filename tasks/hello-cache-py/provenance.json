@@ -1,4 +1,12 @@
 {
   "schema_version": 1,
+  "source": {
+    "rights_basis": "owned",
+    "repository": "https://github.com/askableorg/sweqna-tasks (tasks/hello-cache-py/environment/src)",
+    "license": "proprietary",
+    "ai_training_authorization": "The cachelib package was written by Askable for this example and is owned outright by Askable, so no third-party terms apply and the intended AI-training use is unrestricted.",
+    "owner": null,
+    "permission_record": null
+  },
   "third_party_material": []
 }

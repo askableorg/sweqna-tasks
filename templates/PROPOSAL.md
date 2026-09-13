@@ -20,8 +20,12 @@ most expensive mistake available to you.
 - **Your contributor relationship, if any:** what you have contributed, and
   confirmation that the question is not about code you wrote or reviewed
   (`AUTHORING.md` §2).
-- **Licence flag:** permissive, or copyleft? Copyleft needs a decision before you
-  start. AGPL is out.
+- **Rights basis:** `open-source`, `owned`, or `permissioned` (`AUTHORING.md` §2).
+- **Licence flag:** for open source, permissive or copyleft? Copyleft needs a
+  decision before you start. AGPL is out.
+- **For `permissioned`:** who owns it, and what permission exists. Askable
+  confirms this with the owner before authoring starts. Do not attach private
+  code to a proposal.
 
 ## Question
 

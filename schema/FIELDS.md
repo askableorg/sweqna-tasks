@@ -130,8 +130,20 @@ easy. More than half passing is a warning.
 
 ## `provenance.json`
 
-`third_party_material` is an array, empty only when the task genuinely contains
-no third-party material.
+### `source` — where the codebase itself comes from
+
+| Field | Rule |
+|---|---|
+| `rights_basis` | `"open-source"`, `"owned"`, or `"permissioned"`. See `AUTHORING.md` §2. |
+| `repository` | URL, or an identifier for a private source. |
+| `license` | SPDX identifier for open source; `"proprietary"` otherwise. **AGPL is rejected.** |
+| `ai_training_authorization` | At least 12 words on why these specific terms permit Askable's AI-training use. Repeating the licence name is not an answer. |
+| `owner` | Required for `permissioned`: who owns the code. `null` otherwise. |
+| `permission_record` | Required for `permissioned`: what Askable holds and when it was granted. Askable confirms with the owner directly. `null` otherwise. |
+
+### `third_party_material`
+
+An array, empty only when the task genuinely contains no third-party material.
 
 | Field | Rule |
 |---|---|

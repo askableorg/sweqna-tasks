@@ -43,6 +43,12 @@ Record every third-party dependency, code sample, dataset, binary and fixture in
 or content hash, and an explanation of why its terms permit Askable's intended
 AI-training use.
 
+**Which repository you may use** is covered in `AUTHORING.md` §2: `open-source`,
+`owned`, or `permissioned`, declared as `source.rights_basis` in
+`provenance.json`. For `permissioned`, Askable confirms the grant with the owner
+directly before authoring starts. Never send private code inside a proposal, and
+never include employer code without written permission obtained beforehand.
+
 **Licence, and why the container is not the question.** Packaging a repository
 into a Docker image is redistribution, but so is handing over the source — the
 container only bundles it with its dependencies. Every benchmark in this space

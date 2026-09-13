@@ -99,6 +99,14 @@ PY
 cat > "$TASK_DIR/provenance.json" <<'JSON'
 {
   "schema_version": 1,
+  "source": {
+    "rights_basis": "open-source",
+    "repository": "",
+    "license": "",
+    "ai_training_authorization": "",
+    "owner": null,
+    "permission_record": null
+  },
   "third_party_material": []
 }
 JSON

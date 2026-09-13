@@ -54,6 +54,7 @@ ATTESTATION_CHECKS = (
 # Execution is a difficulty mechanism, not a verification aid (DIFFICULTY.md §2).
 # Only these two categories are routinely settled by reading.
 SOURCE_ONLY_CATEGORIES = {"Architecture", "Code Onboarding"}
+RIGHTS_BASES = {"open-source", "owned", "permissioned"}
 MIN_SELF_CHECK_ATTEMPTS = 3
 SHA_RE = re.compile(r"^[0-9a-f]{40}$")
 LINES_RE = re.compile(r"^(\d+)(?:-(\d+))?$")
@@ -478,6 +479,45 @@ def check_leakage(task: Path, report: Report) -> None:
 
 def check_provenance(task: Path, report: Report) -> None:
     document = load_json(task / "provenance.json", report) or {}
+
+    source = document.get("source")
+    if require_fields(
+        source, ("rights_basis", "repository", "license", "ai_training_authorization"),
+        "provenance.json: source", report
+    ):
+        basis = source["rights_basis"]
+        if basis not in RIGHTS_BASES:
+            report.error(
+                "provenance.json: source.rights_basis must be one of "
+                + ", ".join(sorted(RIGHTS_BASES))
+            )
+        elif basis == "open-source":
+            licence = str(source.get("license", "")).strip().lower()
+            if licence in ("", "proprietary", "none"):
+                report.error(
+                    'provenance.json: rights_basis "open-source" needs the actual '
+                    "licence (an SPDX identifier where one exists)"
+                )
+            if "agpl" in licence:
+                report.error(
+                    "provenance.json: AGPL source is not accepted. Raise it at "
+                    "proposal and pick a different repository."
+                )
+        elif basis == "permissioned":
+            for field in ("owner", "permission_record"):
+                if not str(source.get(field, "")).strip():
+                    report.error(
+                        f'provenance.json: rights_basis "permissioned" requires '
+                        f"source.{field}. Askable verifies permission with the "
+                        "owner directly; your assertion is not the record."
+                    )
+        if len(str(source.get("ai_training_authorization", "")).split()) < 12:
+            report.error(
+                "provenance.json: source.ai_training_authorization must say why "
+                "these specific terms permit Askable's AI-training use, not repeat "
+                "the licence name"
+            )
+
     material = document.get("third_party_material")
     if not isinstance(material, list):
         report.error("provenance.json: third_party_material must be a list")

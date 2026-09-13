@@ -28,6 +28,13 @@ container — and it catches the most common way a SWE Q&A task fails. It also
 answers the Contamination Risk section the buyer requires, which is why the
 record is mandatory rather than advisory.
 
+**Run it for private repositories too.** A model cannot have memorised code it
+has never seen, so the probe cannot fail for that reason — but it can still fail,
+and when it does it is telling you something worse. If a model answers your
+question without the code, the question is about general programming knowledge
+rather than about your codebase, and privacy will not save it. That is the more
+common failure for owned code, not memorisation.
+
 **Public availability is not the test.** A public repository is not automatically
 contaminated and a niche one is not automatically clean. The probe is the test.
 That said, prefer approved, less widely studied projects you know well: they

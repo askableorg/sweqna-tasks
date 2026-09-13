@@ -97,13 +97,42 @@ attestation asks you to confirm the boundary.
 The same reasoning applies more sharply to employer code: do not include it
 without approval and the authority to contribute it.
 
-### Originality and source use
+### Which repository you may use
 
-Prefer approved, less widely studied projects you know well. Disclose related
-public material — issues, discussions, Stack Overflow answers, benchmark items —
-rather than omitting what weakens the proposal; a near-duplicate found at review
-costs the task. Do not copy benchmark questions or lightly rewrite an existing
-answer. Record source permissions and dependencies in `provenance.json`.
+Three paths, and you declare which in `provenance.json` as
+`source.rights_basis`. Askable confirms it at proposal, before you build.
+
+**`open-source`** — a public repository under a licence that permits the use.
+Record the licence and why its specific terms permit Askable's AI-training use,
+not just its name. Permissive licences (MIT, Apache-2.0, BSD) are
+straightforward. Copyleft needs a decision before you start rather than at
+submission. **AGPL is not accepted**, and the validator rejects it.
+
+**`owned`** — code you own outright. The cleanest option for contamination, since
+nothing a model has read can contain it, and the simplest for rights, since there
+is nobody else to ask. Still subject to everything else: the question must take
+real investigation, and a codebase you wrote last week to be a task is not a
+codebase, it is a puzzle.
+
+**`permissioned`** — someone else's private code, with their permission. Name the
+owner and point at the permission record. **Askable verifies this with the owner
+directly**; your assertion is not the record, and a task whose permission cannot
+be confirmed is dropped whatever state it is in. If it is your employer's code,
+get that in writing before you propose, not after you have built.
+
+Do not send private code in a proposal. Describe it, and Askable arranges access
+once the scope is approved.
+
+### Originality and contamination
+
+Prefer projects you know well. For public repositories, prefer less widely
+studied ones: the probe in `DIFFICULTY.md` §1 is the test, but a long-tail project
+starts further from the training distribution and is more likely to survive it.
+
+Disclose related public material — issues, discussions, Stack Overflow answers,
+benchmark items — rather than omitting what weakens the proposal; a near-duplicate
+found at review costs the task. Do not copy benchmark questions or lightly rewrite
+an existing answer. Record dependencies in `provenance.json` alongside the source.
 
 ---
 
