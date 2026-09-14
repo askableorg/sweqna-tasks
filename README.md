@@ -38,32 +38,45 @@ agreement. Do not use this repository to create tasks for another purpose.
 
 ## The workflow, end to end
 
+**Before anything else: propose.** You propose by message, in the six fields your
+invitation sets out. Nothing in this repository gets touched until Askable has
+approved the repository and the scope. One approved task at a time.
+
+Once you have an approval:
+
 1. **Sign the Askable participant agreement**, then clone this repository.
-2. **Create your own private GitHub repository** from your clone. All your work
-   lives there, with real incremental commit history — we review that history as
-   part of acceptance.
-3. **Scaffold a task:** `./scripts/new-task.sh my-task`, or
-   `./scripts/new-task.sh --source-only my-task` for a question the participant
-   answers by reading rather than running.
-4. **Fill `PROPOSAL.md` and send it through Askable.** This is a checkpoint, not
-   a formality: it is where the repository and the scope get approved, and it is
-   the cheapest place to find out the question does not work. It requires the
-   contamination probe (`DIFFICULTY.md`). Do not start substantial authoring
-   before approval. One approved task at a time.
-5. **Build the environment, investigate, and write the answer** with evidence
-   records that cite real paths, symbols and line ranges at the pinned commit.
-   Docker is needed only when the question rests on runtime evidence — see
-   `AUTHORING.md` §4.
-6. **Write the rubric and commit it**, then test it against four answers: your
-   reference, a correct paraphrase, and two plausible flawed answers.
+2. **Create your own private GitHub repository** from your clone, and add
+   `@xicovarisco` as a read collaborator. All your work lives there, with real
+   incremental commit history — we review that history as part of acceptance.
+3. **Scaffold the task:** `./scripts/new-task.sh my-task`, or
+   `./scripts/new-task.sh --source-only my-task` for a question answered by
+   reading rather than running (`AUTHORING.md` §4 — it is narrower than it
+   sounds).
+4. **Pin the commit** into `task.json`, full 40 characters, and paste your
+   approval message into `PROPOSAL.md` and commit it. That file is the record of
+   what was approved, next to what you built.
+5. **Build the environment, investigate, and write the answer**, with evidence
+   records citing real paths, symbols and line ranges at that commit. Run the
+   validator now rather than at the end — it catches a line range that has
+   drifted before you have built anything on top of it.
+6. **Write the rubric and commit it.** Do this *before* step 7 and let the
+   history show it — that ordering is what stops criteria being written to fail
+   answers you have already read.
 7. **Run the self-check:** three agent attempts, every answer graded against that
-   rubric (`DIFFICULTY.md` §5). Gemini 3.8 Flash is free in Gemini CLI and
-   Antigravity, so this costs time, not money.
-8. **Validate:** `./scripts/validate-task.sh tasks/my-task` — clean before you
-   submit.
-9. **Submit** (`CONTRIBUTING.md`), then either add Askable's reviewer account
-   (`@xicovarisco`) as a read collaborator on your private repository, or send an
-   archive.
+   rubric, criterion by criterion (`DIFFICULTY.md` §5). Gemini 3.8 Flash is free
+   in Gemini CLI and Antigravity, so this costs time rather than money. Three of
+   three passing means the question is too easy and the validator will fail it.
+8. **Harvest a failed attempt** into `evaluation/grading-examples.json` as
+   `flawed_agent_<what it got wrong>`, alongside your reference, a correct
+   paraphrase, and one flawed answer you wrote yourself.
+9. **Fill `AUTHOR_NOTES.md`:** contamination probe record, source relationship,
+   what the self-check taught you about your own rubric, effort log, limitations.
+10. **Validate until clean:** `./scripts/validate-task.sh tasks/my-task`.
+11. **Complete the attestation** in `attestations/<your-handle>.md`, bound to the
+    task-code commit.
+12. **Send the handoff** (`CONTRIBUTING.md`): repository URL, task ID, the full
+    submission SHA, and a short summary of the checks you ran.
+13. **Attend the 30-minute walkthrough** and expect at least one revision round.
 
 ## Validate
 
