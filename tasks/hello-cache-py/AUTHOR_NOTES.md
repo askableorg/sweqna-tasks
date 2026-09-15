@@ -54,9 +54,13 @@ grade worse. A full task on a real repository should hit the target honestly.
 ## Source relationship
 
 The `cachelib` package was written for this example, so there is no upstream
-project and no contributor relationship to declare. A real task records here
-which project the author contributes to, what they contributed, and confirmation
-that the question is not about code they wrote or reviewed (`AUTHORING.md` §2).
+project and no contributor relationship to declare.
+
+Authoring about your own code is allowed (`AUTHORING.md` §2). Where it applies,
+this section records what the author wrote, plus what they know about it that is
+not in the repository — and confirms that none of that private context is needed
+to answer the question. Everything E01 to E04 establishes here is read off the
+source and the retained log.
 
 ## Contamination probe
 

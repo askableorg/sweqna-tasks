@@ -21,9 +21,13 @@
 ## Source relationship
 
 <!--
-Do you contribute to this project? What have you contributed, and how do you know
-the areas this question touches? Confirm the question is not about code you wrote
-or reviewed. Write "no relationship" if that is the case.
+What did you write or contribute to this project, and how do you know the areas
+this question touches? Write "no relationship" if that is the case.
+
+Then, if any of it is yours: list what you know about this code that is NOT in
+the repository. Decisions you remember, context from an issue or a chat, an
+invariant nobody wrote down. Check that list against your answer. If nothing on
+it is load-bearing, say so. If something is, change the question.
 -->
 
 ## Contamination probe

@@ -76,23 +76,40 @@ the working repository private. Askable confirms scope, deadline, budget and
 submission location — use the assignment details you are given rather than dates
 carried over from an older brief.
 
-### If you contribute to the project
+### If you wrote the code
 
-Contributing to a repository is the best possible reason to know it well, and it
-creates one specific hazard that is invisible at review.
+Knowing a codebase from the inside is the best possible reason to author about
+it. It also creates one hazard that is invisible at review, and the control is
+not a ban.
 
-**You may not write a question about code you personally wrote or reviewed.** Not
-because of bias, but because of where the answer lives. If you wrote the guard,
-you know why it is there from the design discussion, the PR thread, or a
-conversation that never reached the repository. The question will feel perfectly
-discoverable to you and will not be, and nobody finds out until the independent
-solver cannot get there. That fails the rule that a conclusion must be verifiable
-from the supplied source with no private knowledge.
+**The hazard is where the answer lives.** If you wrote a guard, you may know why
+it is there from a design discussion, a PR thread, or a conversation that never
+reached the repository. The question then feels perfectly discoverable to you and
+is not, and nobody finds out until the independent solver cannot get there. That
+breaks the rule that a conclusion must be verifiable from the supplied source
+with no private knowledge.
 
-Anything else in the project is fair game, and your familiarity with it is an
-advantage. Declare the relationship in `AUTHOR_NOTES.md` — which project, what
-you contributed, and how you know the areas your question touches — and the
-attestation asks you to confirm the boundary.
+**Two conditions, and then your own code is fair game.**
+
+First, the question must be about *observable behaviour derivable from the
+supplied source*. "What happens when this runs" is in. "Why was it designed this
+way" is out unless you ship the documentation that answers it. The test is not
+who typed the code; it is whether a stranger with the same files reaches the same
+conclusion.
+
+Second, list in `AUTHOR_NOTES.md` **what you know about this code that is not in
+the repository** — decisions you remember, context from an issue or a chat, an
+invariant that was never written down. Then check that list against your answer.
+If nothing on it is load-bearing, you are clear. If something is, change the
+question rather than hoping nobody notices.
+
+For `rights_basis: owned` this is not optional care, it is the whole control, and
+the independent human solve is what enforces it: a second engineer gets
+`instruction.md` and the environment and nothing else, including no access to
+you. Write for that reader.
+
+Declare the relationship either way — which project, what you wrote or
+contributed, and how you know the areas your question touches.
 
 The same reasoning applies more sharply to employer code: do not include it
 without approval and the authority to contribute it.

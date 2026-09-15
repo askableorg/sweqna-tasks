@@ -47,7 +47,7 @@ ATTESTATION_CHECKS = (
     "- [x] I ran the no-repository contamination probe",
     "- [x] I committed the rubric before running the self-check",
     "- [x] I disclosed every AI tool used",
-    "- [x] I did not write or review the specific code this question is about",
+    "- [x] I have disclosed my relationship to this code in AUTHOR_NOTES.md",
     "- [x] I own or have authority to contribute",
     "- [x] I assign all right, title, and interest",
 )

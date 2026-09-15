@@ -13,7 +13,7 @@ Date: YYYY-MM-DD
 - [x] I ran the no-repository contamination probe recorded in AUTHOR_NOTES.md and reported its result honestly.
 - [x] I committed the rubric before running the self-check, graded every attempt myself, and disclosed every run including the ones I discarded.
 - [x] I disclosed every AI tool used on this task in ai_tools_used in task.json.
-- [x] I did not write or review the specific code this question is about, and I have disclosed my contributor relationship to the repository in AUTHOR_NOTES.md.
+- [x] I have disclosed my relationship to this code in AUTHOR_NOTES.md, including anything I know about it that is not in the repository, and the answer to my question is derivable from the supplied source alone.
 - [x] I own or have authority to contribute all material in my contribution.
 - [x] I assign all right, title, and interest in my contribution to Askable.
 

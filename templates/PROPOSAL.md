@@ -17,8 +17,9 @@ most expensive mistake available to you.
 - **Primary language(s):**
 - **Your familiarity:** how you know this project — contributed, ran it in
   production, read it closely. Be specific; "I've used it" is not familiarity.
-- **Your contributor relationship, if any:** what you have contributed, and
-  confirmation that the question is not about code you wrote or reviewed
+- **Your relationship to this code:** what you wrote or contributed. Writing
+  about your own code is allowed; the question must be about observable
+  behaviour derivable from the supplied source, not design rationale
   (`AUTHORING.md` §2).
 - **Rights basis:** `open-source`, `owned`, or `permissioned` (`AUTHORING.md` §2).
 - **Licence flag:** for open source, permissive or copyleft? Copyleft needs a
