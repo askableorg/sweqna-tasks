@@ -476,6 +476,15 @@ def check_leakage(task: Path, report: Report) -> None:
         if (task / "environment" / forbidden).exists():
             report.error(f"environment/{forbidden}/ exists inside the participant image")
 
+    # A build that needs the author's credentials cannot be rebuilt by anyone else.
+    for marker in ("--mount=type=ssh", "--mount=type=secret"):
+        if marker in text:
+            report.error(
+                f"environment/Dockerfile: uses {marker}, so the build needs a "
+                "credential you hold. Askable rebuilds from your repository and "
+                "nothing else — vendor the dependency instead (AUTHORING.md §4)."
+            )
+
 
 def check_provenance(task: Path, report: Report) -> None:
     document = load_json(task / "provenance.json", report) or {}

@@ -289,6 +289,19 @@ rig.
 - **Install at build time.** Runtime must work with no network, no credentials,
   no paid services, no private endpoints. Use local fixtures for external
   integrations.
+- **The build must work for someone who is not you.** Askable rebuilds your image
+  from your repository and nothing else: no SSH agent, no registry login, no
+  personal token, no `--mount=type=ssh` or `--mount=type=secret`. If a rebuild
+  needs a credential you hold, the task is not reproducible and the validator
+  rejects it. Everything the build reads must already be in the build context.
+- **Private source and private dependencies get vendored, not fetched.** Your
+  authoring repository is private — that is the point of it — so the pinned
+  source is committed under `environment/`, private or not. A dependency you
+  cannot install without a credential is handled the same way: pack it at a
+  pinned commit, commit the artefact, and point the lockfile at that local path.
+  Record each one in `provenance.json` with its own rights basis. A private
+  dependency fetched during the build is the most common reason an otherwise
+  good container cannot be rebuilt.
 - **Include what investigation needs:** source, configuration, sample inputs, and
   the tools to inspect and run the relevant behaviour. If the question is about
   runtime behaviour, the participant must be able to produce that behaviour.
