@@ -31,10 +31,21 @@ Four conditions are absolute:
    `task.json` (e.g. `["claude-code", "cursor"]`; `[]` if none), and describe what
    each contributed in `AUTHOR_NOTES.md`.
 
-Your private repository's incremental commit history — including the dead ends
-and the experiments that went nowhere — is part of how we verify this. A single
-giant commit is a red flag regardless of how the work was produced. Preserve
-failed experiments in your repository; keep them out of the participant image.
+**We do not grade your commit hygiene.** You were selected partly for fluency
+with agentic tools, and those tools legitimately produce large commits: you
+prompt, a dozen files change, you read them, you commit. Counting commits would
+measure whether you perform tidiness, not whether you did the work — and anyone
+who knew the rule could satisfy it in ten minutes. The walkthrough is where we
+find out whether you can defend what you built, and it is much better at it.
+
+Two things about your history do matter, and both are specific:
+
+- **Commit `evaluation/rubric.json` before you run the self-check.** That
+  ordering has to be visible, because it is the only thing standing between a
+  rubric and criteria written to fail answers the author has already read
+  (`DIFFICULTY.md` §5).
+- **Preserve failed experiments** in your repository rather than deleting them.
+  They are useful at review and they belong out of the participant image.
 
 ## Third-party material and provenance
 

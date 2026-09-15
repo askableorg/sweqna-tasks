@@ -53,6 +53,54 @@ a function is named; a guard whose scope is wider than it looks; an interaction
 between two subsystems neither of which is surprising alone; a configuration flag
 whose effect is not local to where it is read.
 
+### Your answer must be a mechanism, not a gap
+
+The most common way a proposal dies, and the hardest one to see from the inside.
+
+A **gap question** asks whether some protection, check or guard exists, and the
+answer is that it does not. "Does the contract enforce the configured interval?"
+No. "Does this service have any defence against a same-user race?" No. Both feel
+like real findings, because finding a missing guard in code you care about *is* a
+real finding. Neither makes a usable task.
+
+The reason is that there is nothing to trace. An agent opens the function, sees
+no check, and is done. The work you did — reading the whole flow, satisfying
+yourself the guard is absent everywhere, knowing it matters — leaves no trace in
+the question, because confirming an absence takes one read and a couple of greps.
+
+Three symptoms, and any one of them should send you back to §2:
+
+- **Your answer can be written as "no, there isn't one."**
+- **Your rubric criteria all pass or fail together.** Gap questions produce
+  rubrics that look thorough and grade a single fact ten times: the value is
+  stored here, it is validated there, the function is public, it never compares
+  the two, so anyone can call it. That is one fact with nine restatements, and
+  every criterion is a single-line read.
+- **Your independent-solve estimate is short.** If you think a competent engineer
+  settles it in an hour, a frontier agent settles it in a minute.
+
+**The fix is almost never a different repository.** The missing guard is usually
+real and usually interesting — it is just the premise, not the answer. Ask what
+*follows* from it:
+
+| Gap question (dead) | The same finding as a premise (alive) |
+|---|---|
+| "Does the contract enforce the settlement interval, or can anyone settle early?" | "Given that anyone can settle at any moment, does settling thirty times across thirty days pay out the same total as settling once? If not, which direction, and who chooses it?" |
+| "Does this codebase protect against a same-user race, or is it fully exposed?" | "Two functions here both read a row and then write it. Under concurrent requests one loses updates and the other does not. Which is which, and what makes the difference?" |
+
+Both rewrites share the property the gap versions lack: **the obvious reading is
+wrong.** Settlement looks linear in elapsed time and is not, because each leg
+truncates independently and the floating rate is re-sampled at every call. Two
+read-then-write paths look equally unsafe and are not, because one of them issues
+a conditional update whose `WHERE` clause is re-evaluated against the freshly
+committed row. In each case what settles it lives somewhere the reader was not
+looking — in the rounding, or in the database's isolation semantics, rather than
+in the function under suspicion.
+
+That is also what makes them gradeable. A criterion can ask *which* function is
+safe and *why*, and a wrong answer fails it for a stated factual reason rather
+than for insufficient thoroughness.
+
 ### The two-wrong-answers test
 
 Before you go further, write down two plausible wrong conclusions — the ones a
@@ -174,6 +222,14 @@ Include:
 **Every graded requirement must be stated here or clearly entailed by it.** This
 is the rule the rubric is checked against in both directions at review: nothing
 graded that was not asked, nothing essential asked that is not graded.
+
+**Do not put the answer in the question.** The opposite of hiding a requirement,
+and just as fatal. A scenario that says "this stores state with no locking of any
+kind, and the deduplication field is never referenced anywhere" and then asks
+whether the code is exposed has already answered itself; so has a question phrased
+"does it enforce the interval, *or can anyone call it early?*". State the
+situation and the observable symptom. Let the participant establish the
+mechanism, and keep your findings for `reference/answer.md`.
 
 Use plain English. Do not hide a required behaviour behind vague wording. Do not
 manufacture difficulty from output formatting, missing dependencies, or a short

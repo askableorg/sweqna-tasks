@@ -46,8 +46,9 @@ Once you have an approval:
 
 1. **Sign the Askable participant agreement**, then clone this repository.
 2. **Create your own private GitHub repository** from your clone, and add
-   `@xicovarisco` as a read collaborator. All your work lives there, with real
-   incremental commit history — we review that history as part of acceptance.
+   `@xicovarisco` as a read collaborator. All your work lives there. We do not
+   grade commit hygiene, but one ordering has to be visible in the history — see
+   step 6.
 3. **Scaffold the task:** `./scripts/new-task.sh my-task`, or
    `./scripts/new-task.sh --source-only my-task` for a question answered by
    reading rather than running (`AUTHORING.md` §4 — it is narrower than it
