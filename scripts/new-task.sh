@@ -70,14 +70,14 @@ if [[ "$MODE" == "container" ]]; then
     "cpus": 1,
     "memory_mb": 2048,
     "storage_mb": 4096,
-    "network_mode": "no-network",
+    "requires_network": false,
     "source_modifications": ""
   }'
 else
   CATEGORY_DEFAULT="Architecture"
   ENVIRONMENT_BLOCK='{
     "mode": "source-only",
-    "network_mode": "no-network",
+    "requires_network": false,
     "source_modifications": "",
     "source_acquisition": {
       "method": "git",
@@ -226,6 +226,7 @@ cat > "$TASK_DIR/README.md" <<MD
 
 \`\`\`bash
 docker build -t sweqa-${TASK_NAME} environment/
+# --network none is the self-containment check: the image must work without it.
 docker run --rm --network none sweqa-${TASK_NAME} <command>
 \`\`\`
 

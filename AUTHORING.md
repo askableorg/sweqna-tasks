@@ -286,9 +286,16 @@ rig.
 - **Pin everything.** Repository at a full commit SHA, base image by digest,
   dependencies by lockfile or exact version. Record architecture and resource
   requirements in `task.json`.
-- **Install at build time.** Runtime must work with no network, no credentials,
-  no paid services, no private endpoints. Use local fixtures for external
-  integrations.
+- **Self-contained, not offline.** Install at build time. The environment must
+  build from your repository and work with networking off: no live service, no
+  credentials, no paid API, no private endpoint. Use local fixtures for external
+  integrations — a database inside the image, a stub for the rate limiter, a
+  recorded response for the third-party API. That is a property of the task,
+  and it is what lets someone else reproduce the behaviour a year from now.
+  Whether the participant is *given* network access during the run is a
+  different question, decided per batch by Askable alongside the target model
+  and the judge (`DIFFICULTY.md` §4). Do not build your task to depend on either
+  answer, and do not tell the participant which it is.
 - **The build must work for someone who is not you.** Askable rebuilds your image
   from your repository and nothing else: no SSH agent, no registry login, no
   personal token, no `--mount=type=ssh` or `--mount=type=secret`. If a rebuild
@@ -538,7 +545,8 @@ Field-by-field detail is in `schema/FIELDS.md`. Then:
 - [ ] Repository and proposal approved; source commit pinned.
 - [ ] Contamination probe run and recorded, with the model's full answer.
 - [ ] Question is original, self-contained, and needs real investigation.
-- [ ] A fresh container builds and runs offline; build, reset and smoke work.
+- [ ] A fresh container builds from the repository alone and runs with networking
+      off; build, reset and smoke work.
 - [ ] The participant has every tool and input needed, and no answer or rubric
       leakage.
 - [ ] The reference answers every requested part and makes no unsupported claim.

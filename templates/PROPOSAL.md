@@ -64,7 +64,9 @@ attachments, no follow-ups. Record model, version, date, and the full answer.
 - **Planned runtime experiment:** what you will run, and which wrong conclusion
   it rules out.
 - **Dependencies required, and the source of each asset:**
-- **Anything that cannot run offline:** say so now, not at submission.
+- **Anything that depends on a live service** (a hosted database, a third-party
+  API, a rate limiter, a payment provider): say now how it will live inside the
+  image, not at submission.
 
 ## Related public material
 

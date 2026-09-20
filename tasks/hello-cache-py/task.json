@@ -25,7 +25,7 @@
     "cpus": 1,
     "memory_mb": 2048,
     "storage_mb": 4096,
-    "network_mode": "no-network",
+    "requires_network": false,
     "source_modifications": "None. The cachelib package under environment/src was authored for this example rather than taken from an external project, so there is no upstream revision to pin and no modification to disclose. A submittable task pins a real repository to a full commit SHA and records every deviation from it here."
   }
 }

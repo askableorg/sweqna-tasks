@@ -42,6 +42,6 @@ one, and report the command you ran and the output you observed.
 
 - The package is at `/task/src/cachelib`; `PYTHONPATH` is already set to
   `/task/src`.
-- Python 3.12, no network access, no third-party packages required.
+- Python 3.12, no third-party packages required.
 - You may add scratch files anywhere under `/task`. Do not edit the files in
   `/task/src/cachelib` — if you want to test a variant, copy it first.

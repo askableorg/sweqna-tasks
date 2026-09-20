@@ -137,7 +137,7 @@ Hard for the wrong reasons — these get returned:
 - **Withheld context.** Facts the participant cannot discover from the supplied
   environment.
 - **Broken environments.** Missing dependencies, an artificially short timeout, a
-  container that needs the network.
+  container that needs a live service or the network to reproduce the behaviour.
 - **Trivia.** A fact that is hard to find and uninteresting once found.
 - **Undocumented intent.** "Why did the author choose this design?" with no
   supplied documentation that answers it.
@@ -155,6 +155,17 @@ releases in eight days during the terminal-task pilot. Do not hard-code a model
 into your task, your rubric, or your notes. Do not copy the terminal-task
 calibration pin: a result measured under different conditions is a self-check,
 not acceptance evidence.
+
+**Network access during the run is one of those parameters.** Your task must
+work with networking off — that is the reproducibility requirement in
+`AUTHORING.md` §4 — but whether the participant actually gets network is decided
+per batch, not by the author. The benchmarks this bar is set against do not agree
+with each other: the academic SWE-QA harnesses never address it, Scale ran SWE
+Atlas with internet on and later documented agents fetching material from GitHub
+mid-run, and OpenAI's SWE-Lancer counts only offline rollouts as valid. For a task
+whose answer is an explanation, the contamination argument for turning it off is
+real, and the batch brief will say what applies. Do not promise the participant
+either way in `instruction.md`.
 
 Your own three attempts (§5) are a kill screen, not a measurement. Askable's run
 is the measurement.

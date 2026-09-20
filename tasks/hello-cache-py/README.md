@@ -46,6 +46,7 @@ PYTHONPATH=environment/src ./environment/smoke-test.sh
 
 ```bash
 docker build -t sweqa-hello-cache-py environment/
+# --network none is the self-containment check: the image must work without it.
 docker run --rm --network none sweqa-hello-cache-py \
   python3 -c "from cachelib import Store; print(Store().generation)"
 ```

@@ -147,8 +147,18 @@ def check_task_json(task: Path, report: Report) -> dict[str, Any]:
         report.error("task.json: environment must be an object")
         return document
 
-    if environment.get("network_mode") != "no-network":
-        report.error('task.json: environment.network_mode must be "no-network"')
+    if "network_mode" in environment:
+        report.error(
+            "task.json: environment.network_mode has been replaced by "
+            "requires_network. Whether the participant gets network during a run "
+            "is a batch parameter, not a task field (DIFFICULTY.md §4)."
+        )
+    if environment.get("requires_network") is not False:
+        report.error(
+            "task.json: environment.requires_network must be false — the "
+            "environment must build from the repository and work with networking "
+            "off (AUTHORING.md §4)"
+        )
     if not str(environment.get("source_modifications", "")).strip():
         report.error("task.json: environment.source_modifications must be recorded")
 

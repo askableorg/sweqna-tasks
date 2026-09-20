@@ -53,8 +53,11 @@ is not evidence.
 
 **Environment**:
 What the participant investigates in: source at a pinned commit, configuration,
-inputs, and whatever is needed to inspect the relevant behaviour. Always offline,
-and it holds nothing from `reference/`, `evaluation/` or `calibration/`.
+inputs, and whatever is needed to inspect the relevant behaviour. Self-contained:
+it builds from the repository and works with networking off, needing no live
+service and no credential. It holds nothing from `reference/`, `evaluation/` or
+`calibration/`. Whether the participant is given network access during a run is
+a batch parameter Askable sets, not a property of the task.
 
 **Environment mode**:
 `container` or `source-only`, set in `task.json`. `container` ships a Dockerfile

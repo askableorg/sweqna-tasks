@@ -30,7 +30,7 @@ validator is right and this document is a bug.
 | Field | Rule |
 |---|---|
 | `mode` | `"container"` or `"source-only"`. Any task with a non-null `result.log` in `evidence.json` must be `"container"`, and `"source-only"` is allowed only for `Architecture` and `Code Onboarding` categories. See `DIFFICULTY.md` §2 for why. |
-| `network_mode` | Must be `"no-network"`. |
+| `requires_network` | Always `false`. The environment builds from the repository and works with networking off; anything the behaviour depends on ships inside the image. This describes the task, not the participant — whether the participant has network during a run is a batch parameter (`DIFFICULTY.md` §4). |
 | `source_modifications` | Every deviation from the pinned upstream revision. `"None."` if there are none — never empty. |
 
 **`mode: "container"` additionally requires** `environment/Dockerfile`, plus:

@@ -36,5 +36,6 @@ you ran and the output you observed.
 ## Environment
 
 - <!-- where the source is; what is preinstalled; PYTHONPATH or equivalent -->
-- <!-- language and version, no network, no credentials -->
+- <!-- language and version; what is preinstalled. Do not state whether the
+     participant has network access — Askable's harness decides that per batch. -->
 - <!-- what may be modified and what may not -->
