@@ -173,9 +173,16 @@ def check_task_json(task: Path, report: Report) -> dict[str, Any]:
         for field in ("base_image_digest", "architecture"):
             if not str(environment.get(field, "")).strip():
                 report.error(f"task.json: environment.{field} must be recorded")
-        digest = str(environment.get("base_image_digest", ""))
-        if digest.strip() and ("sha256:" not in digest or "REPLACE" in digest):
+        digest = str(environment.get("base_image_digest", "")).strip()
+        if digest and ("sha256:" not in digest or "REPLACE" in digest):
             message = "task.json: environment.base_image_digest is not a real digest"
+            report.warn(message) if is_example else report.error(message)
+        elif digest and not re.fullmatch(r"[^@\s]+@sha256:[0-9a-f]{64}", digest):
+            message = (
+                "task.json: environment.base_image_digest must be "
+                "name@sha256:<digest>, so the image can be pulled by anyone. "
+                f"A bare digest is not enough -- got {digest!r}"
+            )
             report.warn(message) if is_example else report.error(message)
     else:
         if document.get("category") not in SOURCE_ONLY_CATEGORIES:
@@ -428,6 +435,17 @@ def check_grading_examples(task: Path, criteria: list[dict[str, Any]], report: R
     if sum(1 for label in labels if str(label).startswith("flawed")) < 2:
         report.error("grading-examples.json: at least two flawed answers are required")
 
+    for example in examples:
+        if not isinstance(example, dict) or example.get("label") != "correct_paraphrase":
+            continue
+        if example.get("expected_outcome") != "pass":
+            report.error(
+                f"grading-examples.json: {example.get('id')} is a correct_paraphrase "
+                f"expected to {example.get('expected_outcome')!r}. The paraphrase must "
+                "pass -- if it fails, the rubric is grading your wording rather than "
+                "the facts (AUTHORING.md section 9)."
+            )
+
     for index, example in enumerate(examples):
         label = f"grading-examples.json[{index}]"
         if not require_fields(example, ("id", "label", "expected_outcome", "criteria"), label, report):
@@ -522,9 +540,16 @@ def check_provenance(task: Path, report: Report) -> None:
                     "provenance.json: AGPL source is not accepted. Raise it at "
                     "proposal and pick a different repository."
                 )
+        elif basis == "owned" and str(source.get("owner") or "").strip():
+            report.error(
+                'provenance.json: rights_basis "owned" means you own the code '
+                f"outright, but source.owner names {source['owner']!r}. Someone "
+                'else\'s code is "permissioned", and Askable confirms that with '
+                "the owner directly (AUTHORING.md section 2)."
+            )
         elif basis == "permissioned":
             for field in ("owner", "permission_record"):
-                if not str(source.get(field, "")).strip():
+                if not str(source.get(field) or "").strip():
                     report.error(
                         f'provenance.json: rights_basis "permissioned" requires '
                         f"source.{field}. Askable verifies permission with the "
@@ -546,6 +571,48 @@ def check_provenance(task: Path, report: Report) -> None:
         require_fields(item, fields, f"provenance.json[{index}]", report)
 
 
+def check_evidence_commit(
+    document: dict[str, Any], evidence: dict[str, dict[str, Any]], report: Report
+) -> None:
+    """Every claim must be pinned to the commit the task is pinned to."""
+    pinned = str(document.get("repo_commit", "")).strip()
+    if not pinned:
+        return
+    for identifier, record in sorted(evidence.items()):
+        source = record.get("source")
+        if not isinstance(source, dict):
+            continue
+        commit = str(source.get("commit", "")).strip()
+        if commit and commit != pinned:
+            report.error(
+                f"{identifier}: source.commit {commit[:12]} does not match "
+                f"task.json repo_commit {pinned[:12]}"
+            )
+
+
+def check_author_notes(task: Path, report: Report) -> None:
+    """The mandatory sections must be filled in, not left as the template."""
+    path = task / "AUTHOR_NOTES.md"
+    if not path.is_file():
+        report.error("AUTHOR_NOTES.md: missing")
+        return
+    text = path.read_text(encoding="utf-8")
+    for heading in ("Contamination probe", "Source relationship"):
+        match = re.search(
+            rf"^##\s+{re.escape(heading)}\s*$(.*?)(?=^##\s|\Z)", text, re.M | re.S
+        )
+        if not match:
+            report.error(f"AUTHOR_NOTES.md: no '{heading}' section")
+            continue
+        body = re.sub(r"<!--.*?-->", "", match.group(1), flags=re.S)
+        body = re.sub(r"^\s*[-*]\s*\*\*.*?:\*\*\s*$", "", body, flags=re.M)
+        if len(body.strip()) < 40:
+            report.error(
+                f"AUTHOR_NOTES.md: '{heading}' is still the template. "
+                "DIFFICULTY.md section 1 makes the probe record mandatory."
+            )
+
+
 def validate(task: Path) -> Report:
     report = Report()
     if not task.is_dir():
@@ -555,11 +622,13 @@ def validate(task: Path) -> Report:
     document = check_task_json(task, report)
     evidence = check_evidence(task, report)
     check_mode_against_evidence(document, evidence, report)
+    check_evidence_commit(document, evidence, report)
     criteria = check_rubric(task, evidence, report)
     check_grading_examples(task, criteria, report)
     check_self_check(task, document, criteria, report)
     check_leakage(task, report)
     check_provenance(task, report)
+    check_author_notes(task, report)
     return report
 
 

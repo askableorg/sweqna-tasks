@@ -179,11 +179,37 @@ is nobody else to ask. Still subject to everything else: the question must take
 real investigation, and a codebase you wrote last week to be a task is not a
 codebase, it is a puzzle.
 
-**`permissioned`** — someone else's private code, with their permission. Name the
-owner and point at the permission record. **Askable verifies this with the owner
-directly**; your assertion is not the record, and a task whose permission cannot
-be confirmed is dropped whatever state it is in. If it is your employer's code,
-get that in writing before you propose, not after you have built.
+**`permissioned`** — someone else's private code, with their permission. There is
+no licence covering it, so nothing grants Askable anything until the owner does.
+
+**Commit the evidence of the grant into the task**, under `permission/`, and point
+`permission_record` at it. A screenshot or a pasted copy of the granting email is
+fine. What matters is what it shows, not how it reached us:
+
+- the granting entity's **legal** name — not a product or brand name;
+- the person granting it, their role, and the company address or account it came
+  from;
+- the repository and the pinned commit;
+- the date;
+- **what is permitted** — that Askable may receive and store the source, package
+  it into a container image, and deliver it to Askable's clients for AI training
+  and evaluation. "May use our code" does not cover that and will not survive a
+  buyer's provenance review. This is the clause authors under-describe when they
+  ask, and it is the one that voids a permission later.
+
+Askable does not chase every grant, but must be able to. Include a contact who
+can confirm it if it is ever questioned. A task whose permission cannot be
+confirmed when it is questioned is dropped whatever state it is in.
+
+A grant with no scope is the common failure, and it comes from asking the wrong
+question internally. **Being able to share the code is not the same as being able
+to license it.** An engineer usually has the first and almost never the second;
+licensing sits with whoever signs contracts. If it is your employer's code, ask
+that person, in writing, before you propose rather than after you have built.
+
+One shortcut worth raising with them: if the owner will put a permissive licence
+on the repository — MIT or Apache-2.0, and it may stay private — the grant
+already exists and this path does not apply.
 
 Do not send private code in a proposal. Describe it, and Askable arranges access
 once the scope is approved.
@@ -458,7 +484,7 @@ In the worked example, calling the counter an "epoch" passes; reaching the
 distinction by reasoning about ordering rather than by reading the counter
 passes; instrumenting the store instead of varying the prefix passes.
 
-Three failure modes to check for before you submit:
+Four failure modes to check for before you submit:
 
 - **Grading the conclusion only.** `G04` in the worked example reaches the right
   outcome through a mechanism that is not operating. A rubric with no mechanism
@@ -467,6 +493,48 @@ Three failure modes to check for before you submit:
   can imagine, they are one criterion.
 - **Grading what was not asked.** Every `requirement` field must quote or
   paraphrase a clause that is actually in `instruction.md`.
+- **A `pass_condition` and a `fail_condition` that test different things.** If an
+  answer can fail the pass without tripping any clause of the fail, the grader
+  has no rule to apply. See immediately below.
+
+### Every pass demand needs a matching fail clause
+
+Verification is `RUBRIC`, so an LLM judge sits between the answer and the score,
+and judge strictness is confounded with task difficulty in every number anyone
+later reports. A criterion two careful readers apply differently is not a
+nitpick; it is the defining technical risk of this task type.
+
+The mechanical test, and it takes a few minutes for a whole rubric. For each
+criterion, write a sentence that fails the `pass_condition`. Then check whether
+any clause of the `fail_condition` fires. If none does, the criterion is
+undecidable, and whether an answer passes it depends on which reader you drew.
+
+A real example. A `pass_condition` read "states that both options parse
+successfully, `action='append'` preserves both pairs in order, and `_repeat`
+splits NAME=PATH", while the `fail_condition` fired only on rejecting
+duplicates, parsing one, combining at parse time, or omitting the append stage.
+Nothing tested the `_repeat` clause. An answer that explained the append stage
+perfectly but never named `_repeat` failed the pass and tripped no fail — and
+that single clause flipped the criterion on two of the author's three grading
+examples, including the `correct_paraphrase`, which §9 says must pass.
+
+The fix there was to delete the untested clause rather than to add a fail for it.
+Usually it is: a demand nothing fails on is usually a demand you did not mean to
+make.
+
+**Enumerated pass conditions are where this bites hardest.** A `pass_condition`
+that lists several things — "names the summary, the issue row, the log and the
+file inventory" — needs a `fail_condition` clause for naming *some but not all*
+of them. Without one, an answer giving three of the four fails the pass and trips
+nothing.
+
+This matters most when you are fixing the previous problem. Tightening a vague
+`pass_condition` into an explicit list is almost always the right move, and it
+silently opens this gap unless you add the partial clause in the same edit. We
+have watched a reviewer introduce this defect while removing it.
+
+We run this check on every submission before the rubric goes anywhere near a
+judge. Run it on yours first.
 
 ### Worked shape
 
@@ -492,8 +560,14 @@ not grade anything the instruction did not ask about.
 paraphrase, and two plausible flawed answers. Label every criterion met or unmet
 for each, and explain every failure.
 
-- **The reference and the paraphrase must pass.** If the paraphrase fails, the
-  rubric is grading your wording.
+- **The reference and the paraphrase must pass.** If the paraphrase fails,
+  establish which of two things went wrong before you edit anything. A
+  paraphrase that omits something `instruction.md` genuinely requires — a
+  command, an observed output, a named file — is an *example* defect, and the fix
+  belongs in `grading-examples.json`. A paraphrase that states every required
+  fact and still fails is a *rubric* defect: run the §8 pass/fail check against
+  the criterion it failed. Authors lose time editing the rubric to fix a
+  deficient paraphrase, and the edit usually makes the rubric weaker.
 - **The flawed answers must fail for factual reasons.** If you cannot name the
   fact each one gets wrong, it is a strawman and it proves nothing.
 

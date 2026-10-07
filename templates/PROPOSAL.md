@@ -24,9 +24,11 @@ most expensive mistake available to you.
 - **Rights basis:** `open-source`, `owned`, or `permissioned` (`AUTHORING.md` §2).
 - **Licence flag:** for open source, permissive or copyleft? Copyleft needs a
   decision before you start. AGPL is out.
-- **For `permissioned`:** who owns it, and what permission exists. Askable
-  confirms this with the owner before authoring starts. Do not attach private
-  code to a proposal.
+- **For `permissioned`:** who owns it, and what permission exists. You commit the
+  evidence under `permission/`; it must show who granted it, their role and
+  company address, and cover redistribution to Askable's clients for AI training,
+  not just "use". Obtained before authoring starts. Do not attach private code to
+  a proposal.
 
 ## Question
 
