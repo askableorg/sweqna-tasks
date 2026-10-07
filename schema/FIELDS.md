@@ -139,7 +139,7 @@ easy. More than half passing is a warning.
 | `license` | SPDX identifier for open source; `"proprietary"` otherwise. **AGPL is rejected.** |
 | `ai_training_authorization` | At least 12 words on why these specific terms permit Askable's AI-training use. Repeating the licence name is not an answer. |
 | `owner` | Required for `permissioned`: who owns the code. `null` otherwise. |
-| `permission_record` | Required for `permissioned`: what Askable holds and when it was granted. Askable confirms with the owner directly. `null` otherwise. |
+| `permission_record` | Required for `permissioned`: path to the committed evidence under `permission/`, and the date granted. The evidence must show the granting entity's legal name, the person and their role, the repo and commit, the scope (including redistribution to Askable's clients for AI training), and a contact who can confirm it. `null` otherwise. |
 
 ### `third_party_material`
 

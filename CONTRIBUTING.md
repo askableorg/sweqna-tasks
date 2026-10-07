@@ -56,8 +56,9 @@ AI-training use.
 
 **Which repository you may use** is covered in `AUTHORING.md` §2: `open-source`,
 `owned`, or `permissioned`, declared as `source.rights_basis` in
-`provenance.json`. For `permissioned`, Askable confirms the grant with the owner
-directly before authoring starts. Never send private code inside a proposal, and
+`provenance.json`. For `permissioned`, the evidence of the owner's grant
+is committed under `permission/` and must cover redistribution, not just use —
+obtained before authoring starts. Never send private code inside a proposal, and
 never include employer code without written permission obtained beforehand.
 
 **Licence, and why the container is not the question.** Packaging a repository
